@@ -52,11 +52,11 @@ const redraw = (time) => {
     }
 
     //calculate lerp of the x/y from the destinations
-    square.x = lerp(square.prevX, square.destX, square.alpha);
-    square.y = lerp(square.prevY, square.destY, square.alpha);
+    square.x = square.destX;//lerp(square.prevX, square.destX, square.alpha);
+    square.y = square.destY;//lerp(square.prevY, square.destY, square.alpha);
 
     // if we are mid animation or moving in any direction
-    if(square.frame > 0 || (square.moveUp || square.moveDown || square.moveRight || square.moveLeft)) {
+    /*if(square.frame > 0 || (square.moveUp || square.moveDown || square.moveRight || square.moveLeft)) {
       //increase our framecount
       square.frameCount++;
 
@@ -69,7 +69,7 @@ const redraw = (time) => {
           square.frame = 0;
         }
       }
-    }
+    }*/
 
     //draw our characters
     ctx.drawImage(

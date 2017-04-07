@@ -53,24 +53,23 @@ var redraw = function redraw(time) {
     }
 
     //calculate lerp of the x/y from the destinations
-    square.x = lerp(square.prevX, square.destX, square.alpha);
-    square.y = lerp(square.prevY, square.destY, square.alpha);
+    square.x = square.destX; //lerp(square.prevX, square.destX, square.alpha);
+    square.y = square.destY; //lerp(square.prevY, square.destY, square.alpha);
 
     // if we are mid animation or moving in any direction
-    if (square.frame > 0 || square.moveUp || square.moveDown || square.moveRight || square.moveLeft) {
+    /*if(square.frame > 0 || (square.moveUp || square.moveDown || square.moveRight || square.moveLeft)) {
       //increase our framecount
       square.frameCount++;
-
-      //every 8 frames increase which sprite image we draw to animate
+       //every 8 frames increase which sprite image we draw to animate
       //or reset to the beginning of the animation
-      if (square.frameCount % 8 === 0) {
-        if (square.frame < 7) {
+      if(square.frameCount % 8 === 0) {
+        if(square.frame < 7) {
           square.frame++;
         } else {
           square.frame = 0;
         }
       }
-    }
+    }*/
 
     //draw our characters
     ctx.drawImage(walkImage, spriteSizes.WIDTH * square.frame, spriteSizes.HEIGHT * square.direction, spriteSizes.WIDTH, spriteSizes.HEIGHT, square.x, square.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
@@ -119,10 +118,6 @@ var onKeyDown = function onKeyDown(e) {
       square.moveRight = true;
       square.moveLeft = false;
     }
-};
-
-var onKeyPressed = function onKeyPressed(e) {
-  var keyPressed = e.which;
   if (keyPressed === 32) {
     console.log("test");
     sendJump();
@@ -137,11 +132,12 @@ var onKeyUp = function onKeyUp(e) {
   // A OR LEFT
   if (keyPressed === 65 || keyPressed === 37) {
     square.moveLeft = false;
+    console.log('Left Up');
   }
   // D OR RIGHT
   else if (keyPressed === 68 || keyPressed === 39) {
       square.moveRight = false;
-      console.log('test');
+      console.log('Right Up');
     }
 };
 
@@ -158,9 +154,8 @@ var init = function init() {
   socket.on('updatedMovement', update); //when players move
   socket.on('left', removeUser); //when a user leaves
 
-  document.body.addEventListener('keydown', onKeyDown);
-  document.body.addEventListener('keypress', onKeyPressed);
-  document.body.addEventListener('keyup', onKeyUp);
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
 };
 
 window.onload = init;

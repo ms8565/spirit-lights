@@ -33,15 +33,11 @@ const onKeyDown = (e) => {
     square.moveRight = true;
     square.moveLeft = false;
   }
-};
-
-const onKeyPressed = (e) => {
-  var keyPressed = e.which;
   if(keyPressed === 32) {
     console.log("test");
     sendJump();
   }
-}
+};
 
 //handler for key up events
 const onKeyUp = (e) => {
@@ -51,11 +47,12 @@ const onKeyUp = (e) => {
   // A OR LEFT
   if(keyPressed === 65 || keyPressed === 37) {
     square.moveLeft = false;
+    console.log('Left Up');
   }
   // D OR RIGHT
   else if(keyPressed === 68 || keyPressed === 39) {
     square.moveRight = false;
-    console.log('test');
+    console.log('Right Up');
   }
 };
 
@@ -72,9 +69,8 @@ const init = () => {
   socket.on('updatedMovement', update); //when players move
   socket.on('left', removeUser); //when a user leaves
 
-  document.body.addEventListener('keydown', onKeyDown);
-  document.body.addEventListener('keypress', onKeyPressed);
-  document.body.addEventListener('keyup', onKeyUp);
+  window.addEventListener('keydown', onKeyDown);
+  window.addEventListener('keyup', onKeyUp);
 };
 
 window.onload = init;
