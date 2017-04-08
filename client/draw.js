@@ -1,21 +1,17 @@
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
-const directions = {
-  DOWNLEFT: 0,
-  DOWN: 1,
-  DOWNRIGHT: 2, 
-  LEFT: 3,
-  UPLEFT: 4,
-  RIGHT: 5, 
-  UPRIGHT: 6,
-  UP: 7
+ const actions = {
+  LEFT: 1,
+  RIGHT: 2,
+  JUMP: 3,
+  CROUCH: 4
 };
 
 //size of our character sprites
 const spriteSizes = {
-  WIDTH: 61,
-  HEIGHT: 121
+  WIDTH: 64,
+  HEIGHT: 64
 };
 
 //function to lerp (linear interpolation)
@@ -30,7 +26,10 @@ const redraw = (time) => {
   //update this user's positions
   updatePosition();
 
-  ctx.clearRect(0, 0, 500, 500);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+  //Draw background
+  ctx.drawImage(backgroundImage, 0, 0);
 
   //each user id
   const keys = Object.keys(squares);
@@ -52,11 +51,11 @@ const redraw = (time) => {
     }
 
     //calculate lerp of the x/y from the destinations
-    square.x = square.destX;//lerp(square.prevX, square.destX, square.alpha);
-    square.y = square.destY;//lerp(square.prevY, square.destY, square.alpha);
+    square.x = lerp(square.prevX, square.destX, square.alpha);
+    square.y = lerp(square.prevY, square.destY, square.alpha);
 
     // if we are mid animation or moving in any direction
-    /*if(square.frame > 0 || (square.moveUp || square.moveDown || square.moveRight || square.moveLeft)) {
+    if(square.frame > 0 || (square.moveUp || square.moveDown || square.moveRight || square.moveLeft)) {
       //increase our framecount
       square.frameCount++;
 
@@ -69,13 +68,13 @@ const redraw = (time) => {
           square.frame = 0;
         }
       }
-    }*/
+    }
 
     //draw our characters
     ctx.drawImage(
       walkImage, 
       spriteSizes.WIDTH * square.frame,
-      spriteSizes.HEIGHT * square.direction,
+      spriteSizes.HEIGHT * square.action,
       spriteSizes.WIDTH, 
       spriteSizes.HEIGHT,
       square.x, 
@@ -85,7 +84,7 @@ const redraw = (time) => {
     );
     
     //highlight collision box for each character
-    ctx.strokeRect(square.x, square.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    ctx.strokeRect(square.destX, square.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
   }
 
   //set our next animation frame

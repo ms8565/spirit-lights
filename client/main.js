@@ -1,14 +1,13 @@
 let canvas;
 let ctx;
-let walkImage; //spritesheet for character
-let slashImage; //image for attack
+let walkImage; //spritesheet for player
+let backgroundImage; //image for background
 //our websocket connection 
 let socket; 
-let hash; //user's unique character id (from the server)
+let hash; //user's unique id (from the server)
 let animationFrame; //our next animation frame function
 
-let squares = {}; //character list
-let attacks = []; //attacks to draw on screen
+let squares = {}; //player list
 
 var KEYBOARD = {
 	"KEY_D": 68, 
@@ -26,12 +25,10 @@ const onKeyDown = (e) => {
   // A OR LEFT
   if(keyPressed === 65 || keyPressed === 37) {
     square.moveLeft = true;
-    square.moveRight = false;
   }
   // D OR RIGHT
   else if(keyPressed === 68 || keyPressed === 39) {
     square.moveRight = true;
-    square.moveLeft = false;
   }
   if(keyPressed === 32) {
     console.log("test");
@@ -58,7 +55,7 @@ const onKeyUp = (e) => {
 
 const init = () => {
   walkImage = document.querySelector('#walk');
-  slashImage = document.querySelector('#slash');
+  backgroundImage = document.querySelector('#background');
   
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
@@ -66,7 +63,8 @@ const init = () => {
   socket = io.connect();
 
   socket.on('joined', setUser); //when user joins
-  socket.on('updatedMovement', update); //when players move
+  socket.on('updateMovement', updateMovement); //when players move
+  socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
 
   window.addEventListener('keydown', onKeyDown);

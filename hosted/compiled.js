@@ -3,21 +3,17 @@
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
-var directions = {
-  DOWNLEFT: 0,
-  DOWN: 1,
-  DOWNRIGHT: 2,
-  LEFT: 3,
-  UPLEFT: 4,
-  RIGHT: 5,
-  UPRIGHT: 6,
-  UP: 7
+var actions = {
+  LEFT: 1,
+  RIGHT: 2,
+  JUMP: 3,
+  CROUCH: 4
 };
 
 //size of our character sprites
 var spriteSizes = {
-  WIDTH: 61,
-  HEIGHT: 121
+  WIDTH: 64,
+  HEIGHT: 64
 };
 
 //function to lerp (linear interpolation)
@@ -32,7 +28,10 @@ var redraw = function redraw(time) {
   //update this user's positions
   updatePosition();
 
-  ctx.clearRect(0, 0, 500, 500);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  //Draw background
+  ctx.drawImage(backgroundImage, 0, 0);
 
   //each user id
   var keys = Object.keys(squares);
@@ -53,29 +52,30 @@ var redraw = function redraw(time) {
     }
 
     //calculate lerp of the x/y from the destinations
-    square.x = square.destX; //lerp(square.prevX, square.destX, square.alpha);
-    square.y = square.destY; //lerp(square.prevY, square.destY, square.alpha);
+    square.x = lerp(square.prevX, square.destX, square.alpha);
+    square.y = lerp(square.prevY, square.destY, square.alpha);
 
     // if we are mid animation or moving in any direction
-    /*if(square.frame > 0 || (square.moveUp || square.moveDown || square.moveRight || square.moveLeft)) {
+    if (square.frame > 0 || square.moveUp || square.moveDown || square.moveRight || square.moveLeft) {
       //increase our framecount
       square.frameCount++;
-       //every 8 frames increase which sprite image we draw to animate
+
+      //every 8 frames increase which sprite image we draw to animate
       //or reset to the beginning of the animation
-      if(square.frameCount % 8 === 0) {
-        if(square.frame < 7) {
+      if (square.frameCount % 8 === 0) {
+        if (square.frame < 7) {
           square.frame++;
         } else {
           square.frame = 0;
         }
       }
-    }*/
+    }
 
     //draw our characters
-    ctx.drawImage(walkImage, spriteSizes.WIDTH * square.frame, spriteSizes.HEIGHT * square.direction, spriteSizes.WIDTH, spriteSizes.HEIGHT, square.x, square.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    ctx.drawImage(walkImage, spriteSizes.WIDTH * square.frame, spriteSizes.HEIGHT * square.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, square.x, square.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
 
     //highlight collision box for each character
-    ctx.strokeRect(square.x, square.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    ctx.strokeRect(square.destX, square.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
   }
 
   //set our next animation frame
@@ -85,15 +85,14 @@ var redraw = function redraw(time) {
 
 var canvas = void 0;
 var ctx = void 0;
-var walkImage = void 0; //spritesheet for character
-var slashImage = void 0; //image for attack
+var walkImage = void 0; //spritesheet for player
+var backgroundImage = void 0; //image for background
 //our websocket connection 
 var socket = void 0;
-var hash = void 0; //user's unique character id (from the server)
+var hash = void 0; //user's unique id (from the server)
 var animationFrame = void 0; //our next animation frame function
 
-var squares = {}; //character list
-var attacks = []; //attacks to draw on screen
+var squares = {}; //player list
 
 var KEYBOARD = {
   "KEY_D": 68,
@@ -111,12 +110,10 @@ var onKeyDown = function onKeyDown(e) {
   // A OR LEFT
   if (keyPressed === 65 || keyPressed === 37) {
     square.moveLeft = true;
-    square.moveRight = false;
   }
   // D OR RIGHT
   else if (keyPressed === 68 || keyPressed === 39) {
       square.moveRight = true;
-      square.moveLeft = false;
     }
   if (keyPressed === 32) {
     console.log("test");
@@ -143,7 +140,7 @@ var onKeyUp = function onKeyUp(e) {
 
 var init = function init() {
   walkImage = document.querySelector('#walk');
-  slashImage = document.querySelector('#slash');
+  backgroundImage = document.querySelector('#background');
 
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
@@ -151,7 +148,8 @@ var init = function init() {
   socket = io.connect();
 
   socket.on('joined', setUser); //when user joins
-  socket.on('updatedMovement', update); //when players move
+  socket.on('updateMovement', updateMovement); //when players move
+  socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
 
   window.addEventListener('keydown', onKeyDown);
@@ -159,14 +157,18 @@ var init = function init() {
 };
 
 window.onload = init;
-"use strict";
+'use strict';
 
 //when we receive a character update
-var update = function update(data) {
+var updateMovement = function updateMovement(data) {
   //if we do not have that character (based on their id)
   //then add them
   if (!squares[data.hash]) {
     squares[data.hash] = data;
+    return;
+  }
+
+  if (data.hash === hash) {
     return;
   }
 
@@ -175,19 +177,56 @@ var update = function update(data) {
     return;
   }
 
-  //grab the character based on the character id we received
   var square = squares[data.hash];
-  //update their direction and movement information
-  //but NOT their x/y since we are animating those
+  //update their action and movement information
   square.prevX = data.prevX;
   square.prevY = data.prevY;
   square.destX = data.destX;
   square.destY = data.destY;
-  square.direction = data.direction;
+  square.action = data.action;
   square.moveLeft = data.moveLeft;
   square.moveRight = data.moveRight;
   square.velocityY = data.velocityY;
+
   square.alpha = 0.05;
+};
+
+var updatePhysics = function updatePhysics(data) {
+  var updatedPlayers = data.updatedPlayers;
+
+  var keys = Object.keys(updatedPlayers);
+  for (var i = 0; i < keys.length; i++) {
+    var player = updatedPlayers[keys[i]];
+
+    if (!squares[player.hash]) {
+      squares[player.hash] = player;
+      return;
+    }
+
+    if (data.hash === hash) {
+      return;
+    }
+
+    //if we received an old message, just drop it
+    if (squares[player.hash].lastUpdate >= player.lastUpdate) {
+      return;
+    }
+
+    //grab the character based on the character id we received
+    var square = squares[player.hash];
+    //update their direction and movement information
+    //but NOT their x/y since we are animating those
+    square.prevX = player.prevX;
+    square.prevY = player.prevY;
+    square.destX = player.destX;
+    square.destY = player.destY;
+    square.action = player.action;
+    //square.moveLeft = player.moveLeft;
+    //square.moveRight = player.moveRight;
+    square.velocityY = player.velocityY;
+
+    square.alpha = 0.05;
+  }
 };
 
 //function to remove a character from our character list
@@ -220,32 +259,38 @@ var updatePosition = function updatePosition() {
   square.prevX = square.x;
   square.prevY = square.y;
 
-  square.destY += square.velocityY;
-  if (square.destY <= 0) square.destY = 1;
-  if (square.destY >= 400) square.destY = 399;
-
-  //if user is moving left, decrease x
-  if (square.moveLeft && square.destX > 0) {
+  /*square.destY+= square.velocityY;
+  if(square.destY <= 0) square.destY = 1;
+  if(square.destY >= 400) square.destY = 399;
+   //if user is moving left, decrease x
+  if(square.moveLeft && square.destX > 0) {
     console.log("moving left");
     square.destX -= 2;
   }
   //if user is moving right, increase x
-  if (square.moveRight && square.destX < 400) {
+  if(square.moveRight && square.destX < 1000) {
     console.log("moving right");
+      square.destX += 2;
+  }*/
+
+  //if user is moving left, decrease x
+  if (square.moveLeft && square.x > 0) {
+    //console.log("r u MOVVING LEFT?");
+    square.destX -= 2;
+  }
+  //if user is moving right, increase x
+  if (square.moveRight && square.x < 1000) {
+    //console.log("moving right, HUH BUB??");
     square.destX += 2;
   }
 
-  //determine direction based on the inputs of direction keys
-  /*if(square.moveUp && square.moveLeft) square.direction = directions.UPLEFT;
-   if(square.moveUp && square.moveRight) square.direction = directions.UPRIGHT;
-   if(square.moveDown && square.moveLeft) square.direction = directions.DOWNLEFT;
-   if(square.moveDown && square.moveRight) square.direction = directions.DOWNRIGHT;
-   if(square.moveDown && !(square.moveRight || square.moveLeft)) square.direction = directions.DOWN;
-   if(square.moveUp && !(square.moveRight || square.moveLeft)) square.direction = directions.UP;*/
+  if (square.moveLeft) {
+    square.action = actions.LEFT;
+  }
 
-  if (square.moveLeft) square.direction = directions.LEFT;
-
-  if (square.moveRight) square.direction = directions.RIGHT;
+  if (square.moveRight) {
+    square.action = actions.RIGHT;
+  }
 
   //reset this character's alpha so they are always smoothly animating
   square.alpha = 0.05;

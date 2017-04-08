@@ -1,7 +1,7 @@
 
 
 // our socket code for physics to send updates back
-// const sockets = require('./sockets.js');
+const sockets = require('./sockets.js');
 
 let playerList = {}; // list of Players
 
@@ -52,11 +52,25 @@ const setPlayer = (player) => {
 
 const updatePhysics = () => {
   checkPlayerCollisions();
-    // const keys = Object.keys(playerList);
-    // const players = playerList;
-    // for (let i = 0; i < keys.length; i++) {
 
-    // }
+  // gravity update physics
+  const keys = Object.keys(playerList);
+  for (let i = 0; i < keys.length; i++) {
+    if (playerList[keys[i]].destY < 390) {
+      playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
+    }
+    if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocity) {
+      playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocity;
+    }
+
+    playerList[keys[i]].destY += playerList[keys[i]].velocityY;
+
+    if (playerList[keys[i]].destY <= 0) playerList[keys[i]].destY = 1;
+    if (playerList[keys[i]].destY >= 400) playerList[keys[i]].destY = 399;
+
+    playerList[keys[i]].lastUpdate = new Date().getTime();
+  }
+  sockets.updatePhysics(playerList);
 };
 
 // Update players every 20ms
