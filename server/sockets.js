@@ -71,10 +71,8 @@ const setupSockets = (ioServer) => {
 
     socket.on('jump', () => {
       console.log('jump');
-
-        // players[socket.hash].jump();
-      players[socket.hash].velocityY += players[socket.hash].jumpHeight;
-      io.sockets.in('room1').emit('updateMovement', players[socket.hash]);
+      
+      physics.playerJump(players[socket.hash]);
     });
 
     socket.on('disconnect', () => {

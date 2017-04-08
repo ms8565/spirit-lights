@@ -50,14 +50,32 @@ const setPlayer = (player) => {
   playerList[player.hash] = player;
 };
 
+const playerJump = (player) => {
+  //If the player isn't in the air
+  if(!playerList[player.hash].inAir){
+    playerList[player.hash].velocityY += playerList[player.hash].jumpHeight;
+    playerList[player.hash].inAir = true;
+  }
+  else{
+    console.log("velocity: "+playerList[player.hash].velocityY);
+  }
+}
+
 const updatePhysics = () => {
   checkPlayerCollisions();
 
   // gravity update physics
   const keys = Object.keys(playerList);
   for (let i = 0; i < keys.length; i++) {
+    //If the player isn't below the ground or colliding with something below
     if (playerList[keys[i]].destY < 390) {
       playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
+      
+    }
+    else{
+      //playerList[keys[i]].velocityY = 0;
+      playerList[keys[i]].destY = 390;
+       playerList[keys[i]].inAir = false;
     }
     if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocity) {
       playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocity;
@@ -65,8 +83,8 @@ const updatePhysics = () => {
 
     playerList[keys[i]].destY += playerList[keys[i]].velocityY;
 
-    if (playerList[keys[i]].destY <= 0) playerList[keys[i]].destY = 1;
-    if (playerList[keys[i]].destY >= 400) playerList[keys[i]].destY = 399;
+    //if (playerList[keys[i]].destY <= 0) playerList[keys[i]].destY = 1;
+    //if (playerList[keys[i]].destY >= 400) playerList[keys[i]].destY = 399;
 
     playerList[keys[i]].lastUpdate = new Date().getTime();
   }
@@ -80,3 +98,4 @@ setInterval(() => {
 
 module.exports.setPlayerList = setPlayerList;
 module.exports.setPlayer = setPlayer;
+module.exports.playerJump = playerJump;
