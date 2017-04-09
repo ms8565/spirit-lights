@@ -23,6 +23,78 @@ var lerp = function lerp(v0, v1, alpha) {
   return (1 - alpha) * v0 + alpha * v1;
 };
 
+var drawPlayers = function drawPlayers(camera) {
+
+  //each user id
+  var keys = Object.keys(players);
+
+  //for each player
+
+  for (var i = 0; i < keys.length; i++) {
+    var player = players[keys[i]];
+
+    // if we are mid animation or moving in any direction
+    if (player.frame > 0 || player.moveUp || player.moveDown || player.moveRight || player.moveLeft) {
+      //increase our framecount
+      player.frameCount++;
+
+      //every 8 frames increase which sprite image we draw to animate
+      //or reset to the beginning of the animation
+      if (player.frameCount % 8 === 0) {
+        if (player.frame < 7) {
+          player.frame++;
+        } else {
+          player.frame = 0;
+        }
+      }
+    }
+
+    //applying a filter effect to other characters
+    //in order to see our character easily
+    if (player.hash === hash) {
+      ctx.filter = "none";
+
+      var drawX = canvas.width / 2;
+
+      if (player.x < camera.x) {
+        drawX = player.x;
+      }
+      if (player.x > camera.x) {
+        drawX = player.x - camera.x;
+      }
+      var destDifference = player.x - player.destX;
+      var destX = drawX - destDifference;
+
+      //draw our characters
+      ctx.drawImage(walkImage, spriteSizes.WIDTH * player.frame, spriteSizes.HEIGHT * player.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, drawX, player.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+
+      //highlight collision box for each character
+      ctx.strokeRect(destX, player.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    } else {
+      ctx.filter = "hue-rotate(40deg)";
+
+      //if alpha less than 1, increase it by 0.01
+      if (player.alpha < 1) player.alpha += 0.05;
+
+      //calculate lerp of the x/y from the destinations
+      player.x = lerp(player.prevX, player.destX, player.alpha);
+      player.y = lerp(player.prevY, player.destY, player.alpha);
+
+      //draw our characters
+      ctx.drawImage(walkImage, spriteSizes.WIDTH * player.frame, spriteSizes.HEIGHT * player.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, player.x - camera.x, player.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+
+      //highlight collision box for each character
+      ctx.strokeRect(player.destX, player.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    }
+  }
+};
+var drawBackground = function drawBackground(camera) {
+
+  ctx.drawImage(backgroundImage, 0 - camera.x, 0);
+};
+var drawMidground = function drawMidground() {};
+var drawForeground = function drawForeground() {};
+
 //redraw with requestAnimationFrame
 var redraw = function redraw(time) {
   //update this user's positions
@@ -30,53 +102,20 @@ var redraw = function redraw(time) {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  //Draw background
-  ctx.drawImage(backgroundImage, 0, 0);
+  var player = players[hash];
+  if (player.alpha < 1) player.alpha += 0.05;
+  player.x = lerp(player.prevX, player.destX, player.alpha);
+  player.y = lerp(player.prevY, player.destY, player.alpha);
 
-  //each user id
-  var keys = Object.keys(squares);
+  var camera = { x: 0 };
+  camera.x = player.x;
 
-  //for each user
-  for (var i = 0; i < keys.length; i++) {
-    var square = squares[keys[i]];
-
-    //if alpha less than 1, increase it by 0.01
-    if (square.alpha < 1) square.alpha += 0.05;
-
-    //applying a filter effect to other characters
-    //in order to see our character easily
-    if (square.hash === hash) {
-      ctx.filter = "none";
-    } else {
-      ctx.filter = "hue-rotate(40deg)";
-    }
-
-    //calculate lerp of the x/y from the destinations
-    square.x = lerp(square.prevX, square.destX, square.alpha);
-    square.y = lerp(square.prevY, square.destY, square.alpha);
-
-    // if we are mid animation or moving in any direction
-    if (square.frame > 0 || square.moveUp || square.moveDown || square.moveRight || square.moveLeft) {
-      //increase our framecount
-      square.frameCount++;
-
-      //every 8 frames increase which sprite image we draw to animate
-      //or reset to the beginning of the animation
-      if (square.frameCount % 8 === 0) {
-        if (square.frame < 7) {
-          square.frame++;
-        } else {
-          square.frame = 0;
-        }
-      }
-    }
-
-    //draw our characters
-    ctx.drawImage(walkImage, spriteSizes.WIDTH * square.frame, spriteSizes.HEIGHT * square.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, square.x, square.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
-
-    //highlight collision box for each character
-    ctx.strokeRect(square.destX, square.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+  if (camera.x < canvas.width / 2) {
+    camera.x = canvas.width / 2;
   }
+
+  drawBackground(camera);
+  drawPlayers(camera);
 
   //set our next animation frame
   animationFrame = requestAnimationFrame(redraw);
@@ -92,7 +131,7 @@ var socket = void 0;
 var hash = void 0; //user's unique id (from the server)
 var animationFrame = void 0; //our next animation frame function
 
-var squares = {}; //player list
+var players = {}; //player list
 
 var KEYBOARD = {
   "KEY_D": 68,
@@ -105,15 +144,15 @@ var KEYBOARD = {
 //handle for key down events
 var onKeyDown = function onKeyDown(e) {
   var keyPressed = e.which;
-  var square = squares[hash];
+  var player = players[hash];
 
   // A OR LEFT
   if (keyPressed === 65 || keyPressed === 37) {
-    square.moveLeft = true;
+    player.moveLeft = true;
   }
   // D OR RIGHT
   else if (keyPressed === 68 || keyPressed === 39) {
-      square.moveRight = true;
+      player.moveRight = true;
     }
   if (keyPressed === 32) {
     console.log("test");
@@ -124,16 +163,16 @@ var onKeyDown = function onKeyDown(e) {
 //handler for key up events
 var onKeyUp = function onKeyUp(e) {
   var keyPressed = e.which;
-  var square = squares[hash];
+  var player = players[hash];
 
   // A OR LEFT
   if (keyPressed === 65 || keyPressed === 37) {
-    square.moveLeft = false;
+    player.moveLeft = false;
     console.log('Left Up');
   }
   // D OR RIGHT
   else if (keyPressed === 68 || keyPressed === 39) {
-      square.moveRight = false;
+      player.moveRight = false;
       console.log('Right Up');
     }
 };
@@ -163,8 +202,8 @@ window.onload = init;
 var updateMovement = function updateMovement(data) {
   //if we do not have that character (based on their id)
   //then add them
-  if (!squares[data.hash]) {
-    squares[data.hash] = data;
+  if (!players[data.hash]) {
+    players[data.hash] = data;
     return;
   }
 
@@ -173,22 +212,22 @@ var updateMovement = function updateMovement(data) {
   }
 
   //if we received an old message, just drop it
-  if (squares[data.hash].lastUpdate >= data.lastUpdate) {
+  if (players[data.hash].lastUpdate >= data.lastUpdate) {
     return;
   }
 
-  var square = squares[data.hash];
+  var player = players[data.hash];
   //update their action and movement information
-  square.prevX = data.prevX;
-  square.prevY = data.prevY;
-  square.destX = data.destX;
-  square.destY = data.destY;
-  square.action = data.action;
-  square.moveLeft = data.moveLeft;
-  square.moveRight = data.moveRight;
-  square.velocityY = data.velocityY;
+  player.prevX = data.prevX;
+  player.prevY = data.prevY;
+  player.destX = data.destX;
+  player.destY = data.destY;
+  player.action = data.action;
+  player.moveLeft = data.moveLeft;
+  player.moveRight = data.moveRight;
+  player.velocityY = data.velocityY;
 
-  square.alpha = 0.05;
+  player.alpha = 0.05;
 };
 
 var updatePhysics = function updatePhysics(data) {
@@ -198,8 +237,8 @@ var updatePhysics = function updatePhysics(data) {
   for (var i = 0; i < keys.length; i++) {
     var player = updatedPlayers[keys[i]];
 
-    if (!squares[player.hash]) {
-      squares[player.hash] = player;
+    if (!players[player.hash]) {
+      players[player.hash] = player;
       return;
     }
 
@@ -208,93 +247,90 @@ var updatePhysics = function updatePhysics(data) {
     }
 
     //if we received an old message, just drop it
-    if (squares[player.hash].lastUpdate >= player.lastUpdate) {
+    if (players[player.hash].lastUpdate >= player.lastUpdate) {
       return;
     }
 
     //grab the character based on the character id we received
-    var square = squares[player.hash];
+    var updatedPlayer = players[player.hash];
+
     //update their direction and movement information
     //but NOT their x/y since we are animating those
-    square.prevX = player.prevX;
-    square.prevY = player.prevY;
-    square.destX = player.destX;
-    square.destY = player.destY;
-    square.action = player.action;
-    //square.moveLeft = player.moveLeft;
-    //square.moveRight = player.moveRight;
-    square.velocityY = player.velocityY;
+    updatedPlayer.prevX = player.prevX;
+    updatedPlayer.prevY = player.prevY;
+    updatedPlayer.destX = player.destX;
+    updatedPlayer.destY = player.destY;
+    updatedPlayer.action = player.action;
+    updatedPlayer.velocityY = player.velocityY;
 
-    square.alpha = 0.05;
+    updatedPlayer.alpha = 0.05;
   }
 };
 
 //function to remove a character from our character list
 var removeUser = function removeUser(data) {
   //if we have that character, remove them
-  if (squares[data.hash]) {
-    delete squares[data.hash];
+  if (players[data.hash]) {
+    delete players[data.hash];
   }
 };
 
 //function to set this user's character
 var setUser = function setUser(data) {
   hash = data.hash; //set this user's hash to the unique one they received
-  squares[hash] = data; //set the character by their hash
+  players[hash] = data; //set the character by their hash
   requestAnimationFrame(redraw); //start animating
 };
 
 var sendJump = function sendJump() {
-  var square = squares[hash];
+  var player = players[hash];
 
   //send request to server
-  socket.emit('jump', square);
+  socket.emit('jump', player);
 };
 
 //update this user's positions based on keyboard input
 var updatePosition = function updatePosition() {
-  var square = squares[hash];
+  var player = players[hash];
 
   //move the last x/y to our previous x/y variables
-  square.prevX = square.x;
-  square.prevY = square.y;
+  player.prevX = player.x;
+  player.prevY = player.y;
 
-  /*square.destY+= square.velocityY;
-  if(square.destY <= 0) square.destY = 1;
-  if(square.destY >= 400) square.destY = 399;
+  /*player.destY+= player.velocityY;
+  if(player.destY <= 0) player.destY = 1;
+  if(player.destY >= 400) player.destY = 399;
    //if user is moving left, decrease x
-  if(square.moveLeft && square.destX > 0) {
+  if(player.moveLeft && player.destX > 0) {
     console.log("moving left");
-    square.destX -= 2;
+    player.destX -= 2;
   }
   //if user is moving right, increase x
-  if(square.moveRight && square.destX < 1000) {
+  if(player.moveRight && player.destX < 1000) {
     console.log("moving right");
-      square.destX += 2;
+      player.destX += 2;
   }*/
 
   //if user is moving left, decrease x
-  if (square.moveLeft && square.x > 0) {
-    //console.log("r u MOVVING LEFT?");
-    square.destX -= 2;
+  if (player.moveLeft && player.x > 0) {
+    player.destX -= 2;
   }
   //if user is moving right, increase x
-  if (square.moveRight && square.x < 1000) {
-    //console.log("moving right, HUH BUB??");
-    square.destX += 2;
+  if (player.moveRight && player.x < 1000) {
+    player.destX += 2;
   }
 
-  if (square.moveLeft) {
-    square.action = actions.LEFT;
+  if (player.moveLeft) {
+    player.action = actions.LEFT;
   }
 
-  if (square.moveRight) {
-    square.action = actions.RIGHT;
+  if (player.moveRight) {
+    player.action = actions.RIGHT;
   }
 
   //reset this character's alpha so they are always smoothly animating
-  square.alpha = 0.05;
+  player.alpha = 0.05;
 
   //send the updated movement request to the server to validate the movement.
-  socket.emit('movementUpdate', square);
+  socket.emit('movementUpdate', player);
 };

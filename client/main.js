@@ -7,7 +7,7 @@ let socket;
 let hash; //user's unique id (from the server)
 let animationFrame; //our next animation frame function
 
-let squares = {}; //player list
+let players = {}; //player list
 
 var KEYBOARD = {
 	"KEY_D": 68, 
@@ -20,15 +20,15 @@ var KEYBOARD = {
 //handle for key down events
 const onKeyDown = (e) => {
   var keyPressed = e.which;
-  const square = squares[hash];
+  const player = players[hash];
 
   // A OR LEFT
   if(keyPressed === 65 || keyPressed === 37) {
-    square.moveLeft = true;
+    player.moveLeft = true;
   }
   // D OR RIGHT
   else if(keyPressed === 68 || keyPressed === 39) {
-    square.moveRight = true;
+    player.moveRight = true;
   }
   if(keyPressed === 32) {
     console.log("test");
@@ -39,16 +39,16 @@ const onKeyDown = (e) => {
 //handler for key up events
 const onKeyUp = (e) => {
   var keyPressed = e.which;
-  const square = squares[hash];
+  const player = players[hash];
 
   // A OR LEFT
   if(keyPressed === 65 || keyPressed === 37) {
-    square.moveLeft = false;
+    player.moveLeft = false;
     console.log('Left Up');
   }
   // D OR RIGHT
   else if(keyPressed === 68 || keyPressed === 39) {
-    square.moveRight = false;
+    player.moveRight = false;
     console.log('Right Up');
   }
 };

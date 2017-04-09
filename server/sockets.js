@@ -71,7 +71,7 @@ const setupSockets = (ioServer) => {
 
     socket.on('jump', () => {
       console.log('jump');
-      
+
       physics.playerJump(players[socket.hash]);
     });
 
