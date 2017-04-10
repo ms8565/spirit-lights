@@ -1,3 +1,17 @@
+class BackgroundObject{
+  constructor(x, y,width,height,image,depth){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.image = image;
+    this.depth = depth;
+  }
+  draw(camera){
+    ctx.drawImage(this.image,  this.x - camera.localX*(1/this.depth) + camera.worldX, this.y);
+  }
+}
+
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
@@ -71,10 +85,10 @@ const drawPlayers = (camera) => {
 }
 
 const drawBackground = (camera) => {
-  
-  ctx.drawImage(backgroundImage,  canvas.width/2 - camera.localX, 0);
-}
-const drawMidground = () => {
+  for(let i = backgrounds.length; i > 0; i--) {
+     
+     backgrounds[i-1].draw(camera);
+  }
   
 }
 const drawForeground = () => {
@@ -133,8 +147,8 @@ const redraw = (time) => {
   if(camera.localX < canvas.width/2){
     camera.localX = canvas.width/2;
   }
-  else if(camera.localX > 900){
-    camera.localX = 900;
+  else if(camera.localX > 2000){
+    camera.localX = 2000;
   }
   
   

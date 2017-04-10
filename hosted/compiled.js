@@ -1,8 +1,36 @@
 'use strict';
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var BackgroundObject = function () {
+  function BackgroundObject(x, y, width, height, image, depth) {
+    _classCallCheck(this, BackgroundObject);
+
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.image = image;
+    this.depth = depth;
+  }
+
+  _createClass(BackgroundObject, [{
+    key: 'draw',
+    value: function draw(camera) {
+      ctx.drawImage(this.image, this.x - camera.localX * (1 / this.depth) + camera.worldX, this.y);
+    }
+  }]);
+
+  return BackgroundObject;
+}();
+
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
+
+
 var actions = {
   LEFT: 2,
   RIGHT: 1,
@@ -62,10 +90,11 @@ var drawPlayers = function drawPlayers(camera) {
 };
 
 var drawBackground = function drawBackground(camera) {
+  for (var i = backgrounds.length; i > 0; i--) {
 
-  ctx.drawImage(backgroundImage, canvas.width / 2 - camera.localX, 0);
+    backgrounds[i - 1].draw(camera);
+  }
 };
-var drawMidground = function drawMidground() {};
 var drawForeground = function drawForeground() {};
 var lerpPlayers = function lerpPlayers() {
   //each user id
@@ -117,8 +146,8 @@ var redraw = function redraw(time) {
 
   if (camera.localX < canvas.width / 2) {
     camera.localX = canvas.width / 2;
-  } else if (camera.localX > 900) {
-    camera.localX = 900;
+  } else if (camera.localX > 2000) {
+    camera.localX = 2000;
   }
 
   drawBackground(camera);
@@ -137,6 +166,8 @@ var ctx = void 0;
 var ctx2 = void 0;
 var walkImage = void 0; //spritesheet for player
 var backgroundImage = void 0; //image for background
+
+var backgrounds = [];
 //our websocket connection 
 var socket = void 0;
 var hash = void 0; //user's unique id (from the server)
@@ -190,13 +221,21 @@ var onKeyUp = function onKeyUp(e) {
 
 var init = function init() {
   walkImage = document.querySelector('#walk');
-  backgroundImage = document.querySelector('#background');
+  backgroundImage = document.querySelector('#background2');
 
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
 
   canvas2 = document.querySelector('#canvas2');
   ctx2 = canvas2.getContext('2d');
+
+  for (var i = 2; i < 11; i++) {
+    var img = document.querySelector('#background' + i);
+    var sprite = new BackgroundObject(0, -280, 1638, 500, img, i - 1);
+    //let wrapSprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+
+    backgrounds.push(sprite);
+  }
 
   socket = io.connect();
 

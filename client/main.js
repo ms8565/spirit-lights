@@ -4,6 +4,8 @@ let ctx;
 let ctx2;
 let walkImage; //spritesheet for player
 let backgroundImage; //image for background
+
+let backgrounds = [];
 //our websocket connection 
 let socket; 
 let hash; //user's unique id (from the server)
@@ -57,7 +59,7 @@ const onKeyUp = (e) => {
 
 const init = () => {
   walkImage = document.querySelector('#walk');
-  backgroundImage = document.querySelector('#background');
+  backgroundImage = document.querySelector('#background2');
   
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
@@ -65,6 +67,13 @@ const init = () => {
   canvas2 = document.querySelector('#canvas2');
   ctx2 = canvas2.getContext('2d');
   
+  for(let i = 2; i < 11; i++){
+    let img = document.querySelector('#background'+i);
+    let sprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+    //let wrapSprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+    
+    backgrounds.push(sprite);
+  }
 
   socket = io.connect();
 
