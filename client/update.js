@@ -121,7 +121,7 @@ const updatePosition = () => {
     player.destX -= 2;
   }
   //if user is moving right, increase x
-  if(player.moveRight && player.x < 1000) {
+  if(player.moveRight && player.x < 2000) {
     player.destX += 2;
   }
 
