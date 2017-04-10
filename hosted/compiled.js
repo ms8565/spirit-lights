@@ -279,6 +279,7 @@ var updateMovement = function updateMovement(data) {
   player.moveLeft = data.moveLeft;
   player.moveRight = data.moveRight;
   player.velocityY = data.velocityY;
+  player.velocityX = data.velocityX;
 
   player.alpha = 0.05;
 };
@@ -315,6 +316,7 @@ var updatePhysics = function updatePhysics(data) {
     updatedPlayer.destY = player.destY;
     updatedPlayer.action = player.action;
     updatedPlayer.velocityY = player.velocityY;
+    //player.velocityX = data.velocityX;
 
     updatedPlayer.alpha = 0.05;
   }
@@ -364,14 +366,22 @@ var updatePosition = function updatePosition() {
       player.destX += 2;
   }*/
 
+  var moving = false;
+
   //if user is moving left, decrease x
   if (player.moveLeft && player.x > 0) {
-    player.destX -= 2;
+    //player.destX -= 2;
+    player.velocityX = -20;
+    moving = true;
   }
   //if user is moving right, increase x
   if (player.moveRight && player.x < 2000) {
-    player.destX += 2;
+    //player.destX += 2;
+    player.velocityX = 20;
+    moving = true;
   }
+
+  if (!moving) player.velocityX = 0;
 
   if (player.moveLeft) {
     player.action = actions.LEFT;

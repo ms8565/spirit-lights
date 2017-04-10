@@ -58,12 +58,17 @@ const setupSockets = (ioServer) => {
       // NOTICE: THIS IS NOT VALIDED AND IS UNSAFE
       players[socket.hash] = data;
 
+      // if(players[socket.hash].velocityX > 10) players[socket.hash].velocityX = 10;
+      // else if(players[socket.hash].velocityX < -10) players[socket.hash].velocityX = -10;
+      players[socket.hash].destX = players[socket.hash].prevX + players[socket.hash].velocityX;
+
+
       // update timestamp of last change for this character
       players[socket.hash].lastUpdate = new Date().getTime();
 
 
       physics.setPlayer(players[socket.hash]);
-
+      physics.checkCollisions();
 
       // Update other players with movement
       io.sockets.in('room1').emit('updateMovement', players[socket.hash]);

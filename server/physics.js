@@ -31,7 +31,9 @@ const checkPlayerCollisions = () => {
         const collision = isColliding(player1, player2);
 
         if (collision) {
-          // console.log("players are colliding");
+          players[keys[i]].velocityX = 0;
+          players[keys[k]].velocityX = 0;
+          console.log('players are colliding');
         } else {
           // console.log("players are not colliding");
         }
@@ -96,3 +98,4 @@ setInterval(() => {
 module.exports.setPlayerList = setPlayerList;
 module.exports.setPlayer = setPlayer;
 module.exports.playerJump = playerJump;
+module.exports.checkCollisions = checkPlayerCollisions;
