@@ -4,8 +4,8 @@
 //their character. These are mapped
 //to integers for fast/small storage
 var actions = {
-  LEFT: 1,
-  RIGHT: 2,
+  LEFT: 2,
+  RIGHT: 1,
   JUMP: 3,
   CROUCH: 4
 };
@@ -32,7 +32,7 @@ var drawPlayer = function drawPlayer(player, drawX) {
     //every 8 frames increase which sprite image we draw to animate
     //or reset to the beginning of the animation
     if (player.frameCount % 8 === 0) {
-      if (player.frame < 7) {
+      if (player.frame < 9) {
         player.frame++;
       } else {
         player.frame = 0;

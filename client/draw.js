@@ -1,9 +1,9 @@
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
- const actions = {
-  LEFT: 1,
-  RIGHT: 2,
+const actions = {
+  LEFT: 2,
+  RIGHT: 1,
   JUMP: 3,
   CROUCH: 4
 };
@@ -30,7 +30,7 @@ const drawPlayer = (player, drawX) => {
       //every 8 frames increase which sprite image we draw to animate
       //or reset to the beginning of the animation
       if(player.frameCount % 8 === 0) {
-        if(player.frame < 7) {
+        if(player.frame < 9) {
           player.frame++;
         } else {
           player.frame = 0;
@@ -50,6 +50,7 @@ const drawPlayer = (player, drawX) => {
         spriteSizes.WIDTH, 
         spriteSizes.HEIGHT
       );
+  
 }
 
 const drawPlayers = (camera) => {
@@ -99,6 +100,7 @@ const redraw = (time) => {
   updatePosition();
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
   
   lerpPlayers();
   
