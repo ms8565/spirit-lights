@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 //Possible directions a user can move
 //their character. These are mapped
@@ -80,6 +80,28 @@ var lerpPlayers = function lerpPlayers() {
   }
 };
 
+var setShadows = function setShadows(camera) {
+  var player = players[hash];
+  var drawX = player.x + player.width / 2 - camera.localX + camera.worldX;
+  var radius = 100;
+
+  //Create global shadow
+  ctx2.globalCompositeOperation = 'source-over';
+  ctx2.clearRect(0, 0, canvas.width, canvas.height);
+  ctx2.fillStyle = 'rgba( 0, 0, 0, .7 )';
+  ctx2.fillRect(0, 0, canvas.width, canvas.height);
+
+  //Create light gradient for each light
+  var lightGrad = ctx2.createRadialGradient(drawX, player.y, 50, drawX, player.y, 100);
+  lightGrad.addColorStop(0, 'rgba( 0, 0, 0,  1 )');
+  lightGrad.addColorStop(.8, 'rgba( 0, 0, 0, .1 )');
+  lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+
+  ctx2.globalCompositeOperation = 'destination-out';
+  ctx2.fillStyle = lightGrad;
+  ctx2.fillRect(drawX - radius, player.y - radius, radius * 2, radius * 2);
+};
+
 //redraw with requestAnimationFrame
 var redraw = function redraw(time) {
   //update this user's positions
@@ -102,13 +124,17 @@ var redraw = function redraw(time) {
   drawBackground(camera);
   drawPlayers(camera);
 
+  setShadows(camera);
+
   //set our next animation frame
   animationFrame = requestAnimationFrame(redraw);
 };
 "use strict";
 
 var canvas = void 0;
+var canvas2 = void 0;
 var ctx = void 0;
+var ctx2 = void 0;
 var walkImage = void 0; //spritesheet for player
 var backgroundImage = void 0; //image for background
 //our websocket connection 
@@ -168,6 +194,9 @@ var init = function init() {
 
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
+
+  canvas2 = document.querySelector('#canvas2');
+  ctx2 = canvas2.getContext('2d');
 
   socket = io.connect();
 

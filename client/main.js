@@ -1,5 +1,7 @@
 let canvas;
+let canvas2;
 let ctx;
+let ctx2;
 let walkImage; //spritesheet for player
 let backgroundImage; //image for background
 //our websocket connection 
@@ -59,6 +61,10 @@ const init = () => {
   
   canvas = document.querySelector('#canvas');
   ctx = canvas.getContext('2d');
+  
+  canvas2 = document.querySelector('#canvas2');
+  ctx2 = canvas2.getContext('2d');
+  
 
   socket = io.connect();
 
