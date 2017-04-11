@@ -21,9 +21,9 @@ class Player {
     this.moveLeft = false; // if character is moving left
     this.moveRight = false; // if character is moving right
     this.inAir = false;
-    this.jumpHeight = -10;
-    this.fallSpeed = 1;
-    this.maxVelocity = 2;
+    this.jumpHeight = -100;
+    this.fallSpeed = 8;
+    this.maxVelocityY = 12;
     this.velocityY = 0;
     this.velocityX = 0;
   }

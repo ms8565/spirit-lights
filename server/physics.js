@@ -42,7 +42,7 @@ const checkPlayerCollisions = () => {
   }
 };
 
-//Check if new update would cause the player to collide
+//Check if new X update would cause the player to collide
 const checkMoveX = (player) => {
   let newX = player.prevX + player.velocityX;
   const player1 = {x: newX, y: player.y, width: player.width, height: player.height};
@@ -51,8 +51,7 @@ const checkMoveX = (player) => {
   const players = playerList;
 
   for (let i = 0; i < keys.length; i++) {
-    newX = players[keys[i]].prevX + players[keys[i]].velocityX;
-    const player2 = {x: newX, y: players[keys[i]].y, width: players[keys[i]].width, height: players[keys[i]].height};
+    const player2 = {x: players[keys[i]].x, y: players[keys[i]].y, width: players[keys[i]].width, height: players[keys[i]].height};
     
     if(player.hash != players[keys[i]].hash){
       return isColliding(player1, player2);
@@ -60,6 +59,31 @@ const checkMoveX = (player) => {
   }
   return false;
 }
+
+//Check if new Y update would cause the player to collide
+const checkMoveY = (player) => {
+  let newY = player.prevY + player.velocityY;
+  
+  //If the player is below the ground
+  if(newY > 390){
+    return true;
+  }
+  
+  const player1 = {x: player.x, y: newY, width: player.width, height: player.height};
+  
+  const keys = Object.keys(playerList);
+  const players = playerList;
+
+  for (let i = 0; i < keys.length; i++) {
+    const player2 = {x: players[keys[i]].x, y: players[keys[i]].y, width: players[keys[i]].width, height: players[keys[i]].height};
+    
+    if(player.hash != players[keys[i]].hash){
+      return isColliding(player1, player2);
+    }
+  }
+  return false;
+}
+
 
 // update player list
 const setPlayerList = (newPlayerList) => {
@@ -82,25 +106,37 @@ const playerJump = (player) => {
 };
 
 const updatePhysics = () => {
-  checkPlayerCollisions();
 
   // gravity update physics
   const keys = Object.keys(playerList);
   for (let i = 0; i < keys.length; i++) {
     // If the player isn't below the ground or colliding with something below
-    if (playerList[keys[i]].destY < 390) {
+    /*if (playerList[keys[i]].destY < 390) {
       playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
     } else {
       // playerList[keys[i]].velocityY = 0;
       playerList[keys[i]].destY = 390;
       playerList[keys[i]].inAir = false;
-    }
-    if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocity) {
-      playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocity;
-    }
-
-    playerList[keys[i]].destY += playerList[keys[i]].velocityY;
-
+    }*/
+    
+    
+    if (checkMoveY(playerList[keys[i]])){
+        //Player is colliding on y axis
+        playerList[keys[i]].velocityY = 0;
+        playerList[keys[i]].inAir = false;
+        playerList[keys[i]].destY = playerList[keys[i]].prevY;
+      }
+      else{
+        //Player is not colliding on y axis
+        playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
+        
+        if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocityY) {
+          playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocityY;
+        }
+        
+        playerList[keys[i]].destY = playerList[keys[i]].prevY + playerList[keys[i]].velocityY;
+      }
+    
     // if (playerList[keys[i]].destY <= 0) playerList[keys[i]].destY = 1;
     // if (playerList[keys[i]].destY >= 400) playerList[keys[i]].destY = 399;
 
