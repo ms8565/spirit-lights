@@ -12,8 +12,8 @@ class Player {
     this.prevY = 0; // last known y location of character
     this.destX = 0; // destination x location of character
     this.destY = 0; // destination y location of character
-    this.height = 64; // height of character
-    this.width = 64; // width of character
+    this.height = 32; // height of character
+    this.width = 32; // width of character
     this.alpha = 0; // lerp amount (from prev to dest, 0 to 1)
     this.action = 0; // action player is doing
     this.frame = 0; // frame in animation character is on

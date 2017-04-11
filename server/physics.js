@@ -42,6 +42,25 @@ const checkPlayerCollisions = () => {
   }
 };
 
+//Check if new update would cause the player to collide
+const checkMoveX = (player) => {
+  let newX = player.prevX + player.velocityX;
+  const player1 = {x: newX, y: player.y, width: player.width, height: player.height};
+  
+  const keys = Object.keys(playerList);
+  const players = playerList;
+
+  for (let i = 0; i < keys.length; i++) {
+    newX = players[keys[i]].prevX + players[keys[i]].velocityX;
+    const player2 = {x: newX, y: players[keys[i]].y, width: players[keys[i]].width, height: players[keys[i]].height};
+    
+    if(player.hash != players[keys[i]].hash){
+      return isColliding(player1, player2);
+    }
+  }
+  return false;
+}
+
 // update player list
 const setPlayerList = (newPlayerList) => {
   playerList = newPlayerList;
@@ -99,3 +118,4 @@ module.exports.setPlayerList = setPlayerList;
 module.exports.setPlayer = setPlayer;
 module.exports.playerJump = playerJump;
 module.exports.checkCollisions = checkPlayerCollisions;
+module.exports.checkMoveX = checkMoveX;

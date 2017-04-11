@@ -23,7 +23,7 @@ let io;
 };*/
 
 const updatePhysics = (playerList) => {
-    // players = playerList;
+     //players = playerList;
 
     // Update all player physics
   io.sockets.in('room1').emit('updatePhysics', { updatedPlayers: playerList });
@@ -60,7 +60,18 @@ const setupSockets = (ioServer) => {
 
       // if(players[socket.hash].velocityX > 10) players[socket.hash].velocityX = 10;
       // else if(players[socket.hash].velocityX < -10) players[socket.hash].velocityX = -10;
-      players[socket.hash].destX = players[socket.hash].prevX + players[socket.hash].velocityX;
+      
+      
+      
+      if (physics.checkMoveX(players[socket.hash])){
+        //Player is colliding on x axis
+        players[socket.hash].velocityX = 0;
+      }
+      else{
+        //Player is not colliding on x axis
+        players[socket.hash].destX = players[socket.hash].prevX + players[socket.hash].velocityX;
+      }
+      
 
 
       // update timestamp of last change for this character
