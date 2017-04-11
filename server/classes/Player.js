@@ -26,13 +26,6 @@ class Player {
     this.velocityY = 0;
     this.velocityX = 0;
   }
-  updateForces() {
-    this.velocityY += this.fallSpeed;
-    if (this.velocityY > this.maxVelocity) this.velocityY = this.maxVelocity;
-  }
-  jump() {
-    this.velocityY += this.jumpHeight;
-  }
 }
 
 module.exports = Player;

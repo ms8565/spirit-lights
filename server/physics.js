@@ -5,66 +5,71 @@ const sockets = require('./sockets.js');
 
 let playerList = {}; // list of Players
 
+let collidables = [];
+
 // box collision check between two rectangles
 // of a set width/height
-const isColliding = (player1, player2) => {
-  if (player1.x < player2.x + player2.width &&
-     player1.x + player1.width > player2.x &&
-     player1.y < player2.y + player2.height &&
-     player1.height + player1.y > player2.y) {
+const isColliding = (rect1, rect2) => {
+  if (rect1.x < rect2.x + rect2.width &&
+     rect1.x + rect1.width > rect2.x &&
+     rect1.y < rect2.y + rect2.height &&
+     rect1.height + rect1.y > rect2.y) {
     return true;
   }
   return false;
 };
 
-const checkPlayerCollisions = () => {
-    // get all characters
+// check if player is colliding with other players
+const checkPlayerCollisions = (player1Rect, hash) => {
   const keys = Object.keys(playerList);
   const players = playerList;
 
   for (let i = 0; i < keys.length; i++) {
-    for (let k = 0; k < keys.length; k++) {
-      const player1 = players[keys[i]];
-      const player2 = players[keys[k]];
+    const player2Rect = { x: players[keys[i]].x,
+      y: players[keys[i]].y,
+      width: players[keys[i]].width,
+      height: players[keys[i]].height };
 
-      if (player1.hash !== player2.hash) {
-        const collision = isColliding(player1, player2);
-
-        if (collision) {
-          players[keys[i]].velocityX = 0;
-          players[keys[k]].velocityX = 0;
-          console.log('players are colliding');
-        } else {
-          // console.log("players are not colliding");
-        }
+    if (hash !== players[keys[i]].hash) {
+      if (isColliding(player1Rect, player2Rect)) {
+        return true;
       }
     }
   }
+  return false;
+};
+
+// check if player is colliding with objects
+const checkObjectCollisions = (playerRect) => {
+  for (let i = 0; i < collidables.length; i++) {
+    const collidableRect = { x: collidables[i].x,
+      y: collidables[i].y,
+      width: collidables[i].width,
+      height: collidables[i].height };
+
+    if (isColliding(playerRect, collidableRect)) {
+      return true;
+    }
+  }
+  return false;
 };
 
 // Check if new X update would cause the player to collide
 const checkMoveX = (player) => {
   const newX = player.prevX + player.velocityX;
+
   const player1 = { x: newX,
     y: player.y,
     width: player.width,
     height: player.height };
 
-  const keys = Object.keys(playerList);
-  const players = playerList;
+  if (checkPlayerCollisions(player1, player.hash)) return true;
 
-  for (let i = 0; i < keys.length; i++) {
-    const player2 = { x: players[keys[i]].x,
-      y: players[keys[i]].y,
-      width: players[keys[i]].width,
-      height: players[keys[i]].height };
+  if (checkObjectCollisions(player1)) return true;
 
-    if (player.hash !== players[keys[i]].hash) {
-      return isColliding(player1, player2);
-    }
-  }
   return false;
 };
+
 
 // Check if new Y update would cause the player to collide
 const checkMoveY = (player) => {
@@ -80,19 +85,10 @@ const checkMoveY = (player) => {
     width: player.width,
     height: player.height };
 
-  const keys = Object.keys(playerList);
-  const players = playerList;
+  if (checkPlayerCollisions(player1, player.hash)) return true;
 
-  for (let i = 0; i < keys.length; i++) {
-    const player2 = { x: players[keys[i]].x,
-      y: players[keys[i]].y,
-      width: players[keys[i]].width,
-      height: players[keys[i]].height };
+  if (checkObjectCollisions(player1)) return true;
 
-    if (player.hash !== players[keys[i]].hash) {
-      return isColliding(player1, player2);
-    }
-  }
   return false;
 };
 
@@ -100,6 +96,10 @@ const checkMoveY = (player) => {
 // update player list
 const setPlayerList = (newPlayerList) => {
   playerList = newPlayerList;
+};
+
+const setCollidablesList = (newCollidables) => {
+  collidables = newCollidables;
 };
 
 // update a player
@@ -117,7 +117,9 @@ const updatePhysics = () => {
       playerList[keys[i]].destY = playerList[keys[i]].prevY;
     } else {
         // Player will not collide on y axis
+      // if(playerList[keys[i]].velocityY !== 0){
       playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
+      // }
 
       if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocityY) {
         playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocityY;
@@ -148,7 +150,7 @@ const playerJump = (player) => {
 };
 
 module.exports.setPlayerList = setPlayerList;
+module.exports.setCollidablesList = setCollidablesList;
 module.exports.setPlayer = setPlayer;
 module.exports.playerJump = playerJump;
-module.exports.checkCollisions = checkPlayerCollisions;
 module.exports.checkMoveX = checkMoveX;

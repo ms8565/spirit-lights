@@ -12,6 +12,19 @@ class BackgroundObject{
   }
 }
 
+class CollidableObject{
+  constructor(x, y,width,height,image){
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.image = image;
+  }
+  draw(camera){
+    ctx.drawImage(this.image,  this.x - camera.localX + camera.worldX, this.y);
+  }
+}
+
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
@@ -88,9 +101,24 @@ const drawBackground = (camera) => {
   for(let i = backgrounds.length; i > 0; i--) {
      
      backgrounds[i-1].draw(camera);
+  }  
+}
+
+const drawObjects = (camera) => {
+  for(let i = 0; i < collidables.length; i++) {
+    const collidable = collidables[i];
+    const img = collidableSprites[collidables[i].type];
+    ctx.drawImage(img,  
+                  collidable.x - camera.localX + camera.worldX, 
+                  collidable.y,
+                  collidable.width,
+                  collidable.height
+                 );
+    
   }
   
 }
+
 const drawForeground = () => {
   
 }
@@ -155,7 +183,9 @@ const redraw = (time) => {
   
   
   drawBackground(camera);
+  drawObjects(camera);
   drawPlayers(camera);
+  
   
   setShadows(camera);
   

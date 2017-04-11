@@ -13,6 +13,11 @@ let animationFrame; //our next animation frame function
 
 let players = {}; //player list
 
+let collidables = [];
+let collidableSprites = {};
+
+let rock;
+
 var KEYBOARD = {
 	"KEY_D": 68, 
 	"KEY_S": 83, 
@@ -57,6 +62,17 @@ const onKeyUp = (e) => {
   }
 };
 
+const createLevel = (data) => {
+  /*const collidableObjs = data.collidableObjs;
+  for(var i = 0; i < collidableObjs.length; i++){
+    let x = collidableObjs[i].x;
+    let y = collidableObjs[i].y;
+    
+    collidables.push(new CollidableObject(collidableObjs))
+  }*/
+  collidables = data.collidableObjs;
+}
+
 const init = () => {
   walkImage = document.querySelector('#walk');
   backgroundImage = document.querySelector('#background2');
@@ -66,6 +82,11 @@ const init = () => {
   
   canvas2 = document.querySelector('#canvas2');
   ctx2 = canvas2.getContext('2d');
+  
+  backgroundImage = document.querySelector('#background2');
+  
+  collidableSprites['rock'] = document.querySelector('#rock');
+  rock = document.querySelector('#rock');
   
   for(let i = 2; i < 11; i++){
     let img = document.querySelector('#background'+i);
@@ -81,6 +102,7 @@ const init = () => {
   socket.on('updateMovement', updateMovement); //when players move
   socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
+  socket.on('createLevel', createLevel);
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);

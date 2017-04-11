@@ -26,6 +26,27 @@ var BackgroundObject = function () {
   return BackgroundObject;
 }();
 
+var CollidableObject = function () {
+  function CollidableObject(x, y, width, height, image) {
+    _classCallCheck(this, CollidableObject);
+
+    this.x = x;
+    this.y = y;
+    this.width = width;
+    this.height = height;
+    this.image = image;
+  }
+
+  _createClass(CollidableObject, [{
+    key: 'draw',
+    value: function draw(camera) {
+      ctx.drawImage(this.image, this.x - camera.localX + camera.worldX, this.y);
+    }
+  }]);
+
+  return CollidableObject;
+}();
+
 //Possible directions a user can move
 //their character. These are mapped
 //to integers for fast/small storage
@@ -95,6 +116,15 @@ var drawBackground = function drawBackground(camera) {
     backgrounds[i - 1].draw(camera);
   }
 };
+
+var drawObjects = function drawObjects(camera) {
+  for (var i = 0; i < collidables.length; i++) {
+    var collidable = collidables[i];
+    var img = collidableSprites[collidables[i].type];
+    ctx.drawImage(img, collidable.x - camera.localX + camera.worldX, collidable.y, collidable.width, collidable.height);
+  }
+};
+
 var drawForeground = function drawForeground() {};
 var lerpPlayers = function lerpPlayers() {
   //each user id
@@ -151,6 +181,7 @@ var redraw = function redraw(time) {
   }
 
   drawBackground(camera);
+  drawObjects(camera);
   drawPlayers(camera);
 
   setShadows(camera);
@@ -174,6 +205,11 @@ var hash = void 0; //user's unique id (from the server)
 var animationFrame = void 0; //our next animation frame function
 
 var players = {}; //player list
+
+var collidables = [];
+var collidableSprites = {};
+
+var rock = void 0;
 
 var KEYBOARD = {
   "KEY_D": 68,
@@ -219,6 +255,17 @@ var onKeyUp = function onKeyUp(e) {
     }
 };
 
+var createLevel = function createLevel(data) {
+  /*const collidableObjs = data.collidableObjs;
+  for(var i = 0; i < collidableObjs.length; i++){
+    let x = collidableObjs[i].x;
+    let y = collidableObjs[i].y;
+    
+    collidables.push(new CollidableObject(collidableObjs))
+  }*/
+  collidables = data.collidableObjs;
+};
+
 var init = function init() {
   walkImage = document.querySelector('#walk');
   backgroundImage = document.querySelector('#background2');
@@ -228,6 +275,11 @@ var init = function init() {
 
   canvas2 = document.querySelector('#canvas2');
   ctx2 = canvas2.getContext('2d');
+
+  backgroundImage = document.querySelector('#background2');
+
+  collidableSprites['rock'] = document.querySelector('#rock');
+  rock = document.querySelector('#rock');
 
   for (var i = 2; i < 11; i++) {
     var img = document.querySelector('#background' + i);
@@ -243,6 +295,7 @@ var init = function init() {
   socket.on('updateMovement', updateMovement); //when players move
   socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
+  socket.on('createLevel', createLevel);
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);

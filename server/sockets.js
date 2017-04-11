@@ -1,13 +1,20 @@
 
 // fast hashing library
 const xxh = require('xxhashjs');
-// Character custom class
+// Player class
 const Player = require('./classes/Player.js');
+// Collidable Object class
+const Collidable = require('./classes/Collidable.js');
 // our physics calculation file
 const physics = require('./physics.js');
 
 // object of user characters
 let players = {};
+
+// List of collidable objects
+const collidables = [];
+
+// let noncollidables = [];
 
 // our socketio instance
 let io;
@@ -28,6 +35,23 @@ const updatePhysics = (playerList) => {
     // Update all player physics
   io.sockets.in('room1').emit('updatePhysics', { updatedPlayers: playerList });
 };
+
+// Will only be done once, since all levels use the same objects
+const createLevel = (socket) => {
+  collidables.push(new Collidable('rock', 100, 405, 50, 50));
+  collidables.push(new Collidable('rock', 150, 405, 50, 50));
+  collidables.push(new Collidable('rock', 200, 405, 50, 50));
+
+  physics.setCollidablesList(collidables);
+
+  socket.emit('createLevel', { collidableObjs: collidables });
+};
+
+/*const loadMap = () => {
+   const level1 = 390;
+   const level2 = 350;
+   const level3 = 200;
+};*/
 
 // function to setup our socket server
 const setupSockets = (ioServer) => {
@@ -51,6 +75,8 @@ const setupSockets = (ioServer) => {
 
     // emit a joined event to the user and send them their character
     socket.emit('joined', players[hash]);
+
+    createLevel(socket);
 
     // when this user sends the server a movement update
     socket.on('movementUpdate', (data) => {
@@ -76,7 +102,6 @@ const setupSockets = (ioServer) => {
 
 
       physics.setPlayer(players[socket.hash]);
-      physics.checkCollisions();
 
       // Update other players with movement
       io.sockets.in('room1').emit('updateMovement', players[socket.hash]);
