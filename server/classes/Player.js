@@ -20,7 +20,6 @@ class Player {
     this.frameCount = 0; // how many frames since last draw
     this.moveLeft = false; // if character is moving left
     this.moveRight = false; // if character is moving right
-    this.inAir = false;
     this.jumpHeight = -100;
     this.fallSpeed = 8;
     this.maxVelocityY = 12;

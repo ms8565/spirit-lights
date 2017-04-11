@@ -7,7 +7,7 @@ const Player = require('./classes/Player.js');
 const physics = require('./physics.js');
 
 // object of user characters
-const players = {};
+let players = {};
 
 // our socketio instance
 let io;
@@ -23,7 +23,7 @@ let io;
 };*/
 
 const updatePhysics = (playerList) => {
-     //players = playerList;
+  players = playerList;
 
     // Update all player physics
   io.sockets.in('room1').emit('updatePhysics', { updatedPlayers: playerList });
@@ -60,18 +60,15 @@ const setupSockets = (ioServer) => {
 
       // if(players[socket.hash].velocityX > 10) players[socket.hash].velocityX = 10;
       // else if(players[socket.hash].velocityX < -10) players[socket.hash].velocityX = -10;
-      
-      
-      
-      if (physics.checkMoveX(players[socket.hash])){
-        //Player is colliding on x axis
+
+
+      if (physics.checkMoveX(players[socket.hash])) {
+        // Player is colliding on x axis
         players[socket.hash].velocityX = 0;
-      }
-      else{
-        //Player is not colliding on x axis
+      } else {
+        // Player is not colliding on x axis
         players[socket.hash].destX = players[socket.hash].prevX + players[socket.hash].velocityX;
       }
-      
 
 
       // update timestamp of last change for this character
@@ -89,6 +86,8 @@ const setupSockets = (ioServer) => {
       console.log('jump');
 
       physics.playerJump(players[socket.hash]);
+
+      io.sockets.in('room1').emit('updateMovement', players[socket.hash]);
     });
 
     socket.on('disconnect', () => {
