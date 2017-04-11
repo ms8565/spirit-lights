@@ -38,16 +38,17 @@ const updatePhysics = (playerList) => {
 
 // Will only be done once, since all levels use the same objects
 const createLevel = (socket) => {
-  collidables.push(new Collidable('rock', 100, 405, 50, 50));
-  collidables.push(new Collidable('rock', 150, 405, 50, 50));
-  collidables.push(new Collidable('rock', 200, 405, 50, 50));
+  collidables.push(new Collidable('rock', 100, 400, 50, 50));
+  collidables.push(new Collidable('rock', 150, 400, 50, 50));
+  collidables.push(new Collidable('rock', 200, 400, 50, 50));
+  collidables.push(new Collidable('rock', 400, 400, 50, 50));
 
   physics.setCollidablesList(collidables);
 
   socket.emit('createLevel', { collidableObjs: collidables });
 };
 
-/*const loadMap = () => {
+/* const loadMap = () => {
    const level1 = 390;
    const level2 = 350;
    const level3 = 200;

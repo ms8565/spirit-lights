@@ -109,13 +109,14 @@ const drawObjects = (camera) => {
     const collidable = collidables[i];
     const img = collidableSprites[collidables[i].type];
     ctx.drawImage(img,  
-                  collidable.x - camera.localX + camera.worldX, 
-                  collidable.y,
+                  collidable.x - camera.localX + camera.worldX + collidable.width/2, 
+                  collidable.y + collidable.height/2,
                   collidable.width,
                   collidable.height
                  );
     
   }
+  
   
 }
 

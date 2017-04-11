@@ -121,7 +121,7 @@ var drawObjects = function drawObjects(camera) {
   for (var i = 0; i < collidables.length; i++) {
     var collidable = collidables[i];
     var img = collidableSprites[collidables[i].type];
-    ctx.drawImage(img, collidable.x - camera.localX + camera.worldX, collidable.y, collidable.width, collidable.height);
+    ctx.drawImage(img, collidable.x - camera.localX + camera.worldX + collidable.width / 2, collidable.y + collidable.height / 2, collidable.width, collidable.height);
   }
 };
 

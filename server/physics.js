@@ -73,10 +73,10 @@ const checkMoveX = (player) => {
 
 // Check if new Y update would cause the player to collide
 const checkMoveY = (player) => {
-  const newY = player.prevY + player.velocityY;
+  const newY = player.prevY + player.velocityY + 5;
 
   // If the player is below the ground
-  if (newY > 390) {
+  if (newY > 400) {
     return true;
   }
 
@@ -116,10 +116,7 @@ const updatePhysics = () => {
       playerList[keys[i]].velocityY = 0;
       playerList[keys[i]].destY = playerList[keys[i]].prevY;
     } else {
-        // Player will not collide on y axis
-      // if(playerList[keys[i]].velocityY !== 0){
       playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
-      // }
 
       if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocityY) {
         playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocityY;
