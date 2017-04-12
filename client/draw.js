@@ -29,10 +29,11 @@ class CollidableObject{
 //their character. These are mapped
 //to integers for fast/small storage
 const actions = {
+  IDLE: 0,
   LEFT: 2,
   RIGHT: 1,
   JUMP: 3,
-  CROUCH: 4
+  LIGHTUP: 4
 };
 
 //size of our character sprites
@@ -50,7 +51,7 @@ const lerp = (v0, v1, alpha) => {
 
 const drawPlayer = (player, drawX) => {
   // if we are mid animation or moving in any direction
-    if(player.frame > 0 || (player.moveUp || player.moveDown || player.moveRight || player.moveLeft)) {
+    if(player.frame > 0 || (player.moveRight || player.moveLeft)) {
       //increase our framecount
       player.frameCount++;
 
@@ -60,7 +61,11 @@ const drawPlayer = (player, drawX) => {
         if(player.frame < 9) {
           player.frame++;
         } else {
-          player.frame = 0;
+          
+          //If the player is lighting, then they should stay in that pose
+          if(player.action !== actions.LIGHTUP){
+            player.frame = 0;
+          }
         }
       }
     }
@@ -138,8 +143,7 @@ const lerpPlayers = () => {
 }
 
 const setShadows = (camera) =>{
-  let player = players[hash];
-  let drawX = player.x + player.width/2 - camera.localX + camera.worldX;
+  
   let radius = 100;
   
   //Create global shadow
@@ -148,15 +152,29 @@ const setShadows = (camera) =>{
   ctx2.fillStyle = 'rgba( 0, 0, 0, .7 )';
   ctx2.fillRect ( 0, 0, canvas.width, canvas.height );
   
-  //Create light gradient for each light
-  var lightGrad = ctx2.createRadialGradient( drawX, player.y, 50, drawX, player.y, 100 );
-  lightGrad.addColorStop(  0, 'rgba( 0, 0, 0,  1 )' );
-  lightGrad.addColorStop( .8, 'rgba( 0, 0, 0, .1 )' );
-  lightGrad.addColorStop(  1, 'rgba( 0, 0, 0,  0 )' );
-
-  ctx2.globalCompositeOperation = 'destination-out';
-  ctx2.fillStyle = lightGrad;
-  ctx2.fillRect(drawX-radius, player.y - radius, radius*2, radius*2 );
+  //Create light gradient for each player light
+  const keys = Object.keys(players);
+  
+  for(let i = 0; i < keys.length; i++) {
+    let player = players[[keys[i]]];
+    let drawX = player.x + player.width/2 - camera.localX + camera.worldX;
+    
+    let lightGrad = ctx2.createRadialGradient( drawX, player.y, player.lightRadius/2, drawX, player.y, player.lightRadius );
+    
+    lightGrad.addColorStop(  0, 'rgba( 200, 50, 80,  1 )' );
+      lightGrad.addColorStop( .8, 'rgba( 100, 50, 80, .1 )' );
+      lightGrad.addColorStop(  1, 'rgba( 0, 0, 0,  0 )' );
+    
+    ctx2.globalCompositeOperation = 'destination-out';
+    ctx2.fillStyle = lightGrad;
+    ctx2.fillRect(drawX-player.lightRadius, player.y - player.lightRadius, player.lightRadius*2, player.lightRadius*2 );
+    
+    if(players[keys[i]].lightUp){
+      ctx2.globalCompositeOperation = 'source-atop';
+      ctx2.fillStyle = lightGrad;
+      ctx2.fillRect(drawX-player.lightRadius, player.y - player.lightRadius, player.lightRadius*2, player.lightRadius*2 );
+    }
+  }
 }
 
 //redraw with requestAnimationFrame

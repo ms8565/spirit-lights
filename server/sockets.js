@@ -26,7 +26,7 @@ let io;
   LEFT: 1,
   RIGHT: 2,
   JUMP: 3,
-  CROUCH: 4,
+  LIGHTUP: 4,
 };*/
 
 const updatePhysics = (playerList) => {
@@ -108,9 +108,13 @@ const setupSockets = (ioServer) => {
       io.sockets.in('room1').emit('updateMovement', players[socket.hash]);
     });
 
-    socket.on('jump', () => {
-      console.log('jump');
+    socket.on('updateLight', (data) => {
+      players[socket.hash] = data;
+      physics.setPlayer(players[socket.hash]);
 
+      io.sockets.in('room1').emit('updateMovement', players[socket.hash]);
+    });
+    socket.on('jump', () => {
       physics.playerJump(players[socket.hash]);
 
       io.sockets.in('room1').emit('updateMovement', players[socket.hash]);

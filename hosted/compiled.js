@@ -53,10 +53,11 @@ var CollidableObject = function () {
 
 
 var actions = {
+  IDLE: 0,
   LEFT: 2,
   RIGHT: 1,
   JUMP: 3,
-  CROUCH: 4
+  LIGHTUP: 4
 };
 
 //size of our character sprites
@@ -74,7 +75,7 @@ var lerp = function lerp(v0, v1, alpha) {
 
 var drawPlayer = function drawPlayer(player, drawX) {
   // if we are mid animation or moving in any direction
-  if (player.frame > 0 || player.moveUp || player.moveDown || player.moveRight || player.moveLeft) {
+  if (player.frame > 0 || player.moveRight || player.moveLeft) {
     //increase our framecount
     player.frameCount++;
 
@@ -84,7 +85,11 @@ var drawPlayer = function drawPlayer(player, drawX) {
       if (player.frame < 9) {
         player.frame++;
       } else {
-        player.frame = 0;
+
+        //If the player is lighting, then they should stay in that pose
+        if (player.action !== actions.LIGHTUP) {
+          player.frame = 0;
+        }
       }
     }
   }
@@ -140,8 +145,7 @@ var lerpPlayers = function lerpPlayers() {
 };
 
 var setShadows = function setShadows(camera) {
-  var player = players[hash];
-  var drawX = player.x + player.width / 2 - camera.localX + camera.worldX;
+
   var radius = 100;
 
   //Create global shadow
@@ -150,15 +154,29 @@ var setShadows = function setShadows(camera) {
   ctx2.fillStyle = 'rgba( 0, 0, 0, .7 )';
   ctx2.fillRect(0, 0, canvas.width, canvas.height);
 
-  //Create light gradient for each light
-  var lightGrad = ctx2.createRadialGradient(drawX, player.y, 50, drawX, player.y, 100);
-  lightGrad.addColorStop(0, 'rgba( 0, 0, 0,  1 )');
-  lightGrad.addColorStop(.8, 'rgba( 0, 0, 0, .1 )');
-  lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+  //Create light gradient for each player light
+  var keys = Object.keys(players);
 
-  ctx2.globalCompositeOperation = 'destination-out';
-  ctx2.fillStyle = lightGrad;
-  ctx2.fillRect(drawX - radius, player.y - radius, radius * 2, radius * 2);
+  for (var i = 0; i < keys.length; i++) {
+    var player = players[[keys[i]]];
+    var drawX = player.x + player.width / 2 - camera.localX + camera.worldX;
+
+    var lightGrad = ctx2.createRadialGradient(drawX, player.y, player.lightRadius / 2, drawX, player.y, player.lightRadius);
+
+    lightGrad.addColorStop(0, 'rgba( 200, 50, 80,  1 )');
+    lightGrad.addColorStop(.8, 'rgba( 100, 50, 80, .1 )');
+    lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+
+    ctx2.globalCompositeOperation = 'destination-out';
+    ctx2.fillStyle = lightGrad;
+    ctx2.fillRect(drawX - player.lightRadius, player.y - player.lightRadius, player.lightRadius * 2, player.lightRadius * 2);
+
+    if (players[keys[i]].lightUp) {
+      ctx2.globalCompositeOperation = 'source-atop';
+      ctx2.fillStyle = lightGrad;
+      ctx2.fillRect(drawX - player.lightRadius, player.y - player.lightRadius, player.lightRadius * 2, player.lightRadius * 2);
+    }
+  }
 };
 
 //redraw with requestAnimationFrame
@@ -224,16 +242,21 @@ var onKeyDown = function onKeyDown(e) {
   var keyPressed = e.which;
   var player = players[hash];
 
-  // A OR LEFT
-  if (keyPressed === 65 || keyPressed === 37) {
-    player.moveLeft = true;
-  }
-  // D OR RIGHT
-  else if (keyPressed === 68 || keyPressed === 39) {
-      player.moveRight = true;
-    }
+  //Space
   if (keyPressed === 32) {
-    console.log("test");
+    sendLightUp();
+  }
+  // A or Left
+  else if (keyPressed === 65 || keyPressed === 37) {
+      player.moveLeft = true;
+    }
+    // D or Right
+    else if (keyPressed === 68 || keyPressed === 39) {
+        player.moveRight = true;
+      }
+
+  //W or Up
+  if (keyPressed === 87 || keyPressed === 38) {
     sendJump();
   }
 };
@@ -243,16 +266,20 @@ var onKeyUp = function onKeyUp(e) {
   var keyPressed = e.which;
   var player = players[hash];
 
-  // A OR LEFT
-  if (keyPressed === 65 || keyPressed === 37) {
-    player.moveLeft = false;
-    console.log('Left Up');
+  //Space
+  if (keyPressed === 32) {
+    player.lightUp = false;
   }
-  // D OR RIGHT
-  else if (keyPressed === 68 || keyPressed === 39) {
-      player.moveRight = false;
-      console.log('Right Up');
+  // A or Left
+  else if (keyPressed === 65 || keyPressed === 37) {
+      player.moveLeft = false;
+      console.log('Left Up');
     }
+    // D or Right
+    else if (keyPressed === 68 || keyPressed === 39) {
+        player.moveRight = false;
+        console.log('Right Up');
+      }
 };
 
 var createLevel = function createLevel(data) {
@@ -331,6 +358,7 @@ var updateMovement = function updateMovement(data) {
   player.action = data.action;
   player.moveLeft = data.moveLeft;
   player.moveRight = data.moveRight;
+  player.lightUp = data.lightUp;
   player.velocityY = data.velocityY;
   player.velocityX = data.velocityX;
 
@@ -369,6 +397,7 @@ var updatePhysics = function updatePhysics(data) {
     updatedPlayer.destY = player.destY;
     updatedPlayer.action = player.action;
     updatedPlayer.velocityY = player.velocityY;
+    updatedPlayer.lightRadius = player.lightRadius;
     //player.velocityX = data.velocityX;
 
     updatedPlayer.alpha = 0.05;
@@ -397,6 +426,26 @@ var sendJump = function sendJump() {
   socket.emit('jump', player);
 };
 
+var sendLightUp = function sendLightUp() {
+  var player = players[hash];
+
+  player.lightUp = true;
+  player.action = actions.LIGHTUP;
+
+  //send request to server
+  socket.emit('updateLight', player);
+};
+
+var sendLightDown = function sendLightDown() {
+  var player = players[hash];
+
+  player.lightUp = false;
+  player.action = actions.IDLE;
+
+  //send request to server
+  socket.emit('updateLight', player);
+};
+
 //update this user's positions based on keyboard input
 var updatePosition = function updatePosition() {
   var player = players[hash];
@@ -422,13 +471,13 @@ var updatePosition = function updatePosition() {
   var moving = false;
 
   //if user is moving left, decrease x
-  if (player.moveLeft && player.x > 0) {
+  if (player.moveLeft && player.x > 0 && !player.lightUp) {
     //player.destX -= 2;
     player.velocityX = -20;
     moving = true;
   }
   //if user is moving right, increase x
-  if (player.moveRight && player.x < 2000) {
+  if (player.moveRight && player.x < 2000 && !player.lightUp) {
     //player.destX += 2;
     player.velocityX = 20;
     moving = true;
@@ -436,12 +485,14 @@ var updatePosition = function updatePosition() {
 
   if (!moving) player.velocityX = 0;
 
-  if (player.moveLeft) {
+  if (player.lightUp) {
+    player.action = actions.LIGHTUP;
+  } else if (player.moveLeft) {
     player.action = actions.LEFT;
-  }
-
-  if (player.moveRight) {
+  } else if (player.moveRight) {
     player.action = actions.RIGHT;
+  } else {
+    player.action = actions.IDLE;
   }
 
   //reset this character's alpha so they are always smoothly animating

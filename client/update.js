@@ -25,6 +25,7 @@ const updateMovement = (data) => {
   player.action = data.action;
   player.moveLeft = data.moveLeft;
   player.moveRight = data.moveRight;
+  player.lightUp = data.lightUp;
   player.velocityY = data.velocityY;
   player.velocityX = data.velocityX;
     
@@ -65,6 +66,7 @@ const updatePhysics = (data) => {
     updatedPlayer.destY = player.destY;
     updatedPlayer.action = player.action;
     updatedPlayer.velocityY = player.velocityY;
+    updatedPlayer.lightRadius = player.lightRadius;
     //player.velocityX = data.velocityX;
 
     updatedPlayer.alpha = 0.05;
@@ -93,6 +95,26 @@ const sendJump = () => {
   socket.emit('jump', player);
 };
 
+const sendLightUp = () => {
+  const player = players[hash];
+  
+  player.lightUp = true;
+  player.action = actions.LIGHTUP;
+  
+  //send request to server
+  socket.emit('updateLight', player);
+};
+
+const sendLightDown = () => {
+  const player = players[hash];
+  
+  player.lightUp = false;
+  player.action = actions.IDLE;
+  
+  //send request to server
+  socket.emit('updateLight', player);
+};
+
 //update this user's positions based on keyboard input
 const updatePosition = () => {
   const player = players[hash];
@@ -119,13 +141,13 @@ const updatePosition = () => {
   let moving = false;
 
   //if user is moving left, decrease x
-  if(player.moveLeft && player.x > 0) {
+  if(player.moveLeft && player.x > 0 && !player.lightUp) {
     //player.destX -= 2;
     player.velocityX = -20;
     moving = true;
   }
   //if user is moving right, increase x
-  if(player.moveRight && player.x < 2000) {
+  if(player.moveRight && player.x < 2000 && !player.lightUp) {
     //player.destX += 2;
     player.velocityX = 20;
     moving = true;
@@ -133,14 +155,17 @@ const updatePosition = () => {
   
   if(!moving) player.velocityX = 0
 
-  if(player.moveLeft){ 
-    player.action = actions.LEFT;
-    
+  if(player.lightUp){
+    player.action = actions.LIGHTUP;
   }
-
-  if(player.moveRight){ 
+  else if (player.moveLeft) {
+    player.action = actions.LEFT;
+  }
+  else if (player.moveRight) {
     player.action = actions.RIGHT;
-    
+  }
+  else{
+      player.action = actions.IDLE;
   }
 
   //reset this character's alpha so they are always smoothly animating

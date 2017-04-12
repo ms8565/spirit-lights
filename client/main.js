@@ -31,18 +31,24 @@ const onKeyDown = (e) => {
   var keyPressed = e.which;
   const player = players[hash];
 
-  // A OR LEFT
-  if(keyPressed === 65 || keyPressed === 37) {
+  //Space
+  if(keyPressed === 32) {
+    sendLightUp();
+  }
+  // A or Left
+  else if(keyPressed === 65 || keyPressed === 37) {
     player.moveLeft = true;
   }
-  // D OR RIGHT
+  // D or Right
   else if(keyPressed === 68 || keyPressed === 39) {
     player.moveRight = true;
   }
-  if(keyPressed === 32) {
-    console.log("test");
+  
+  //W or Up
+  if(keyPressed === 87 || keyPressed === 38) {
     sendJump();
   }
+
 };
 
 //handler for key up events
@@ -50,12 +56,16 @@ const onKeyUp = (e) => {
   var keyPressed = e.which;
   const player = players[hash];
 
-  // A OR LEFT
-  if(keyPressed === 65 || keyPressed === 37) {
+  //Space
+  if(keyPressed === 32) {
+    player.lightUp = false;
+  }
+  // A or Left
+  else if(keyPressed === 65 || keyPressed === 37) {
     player.moveLeft = false;
     console.log('Left Up');
   }
-  // D OR RIGHT
+  // D or Right
   else if(keyPressed === 68 || keyPressed === 39) {
     player.moveRight = false;
     console.log('Right Up');

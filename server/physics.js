@@ -111,11 +111,13 @@ const updatePhysics = () => {
   // gravity update physics
   const keys = Object.keys(playerList);
   for (let i = 0; i < keys.length; i++) {
+    // Check if next update of gravity will make the player collide
     if (checkMoveY(playerList[keys[i]])) {
         // Player will collide on y axis
       playerList[keys[i]].velocityY = 0;
       playerList[keys[i]].destY = playerList[keys[i]].prevY;
     } else {
+      // Otherwise update position with gravity
       playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
 
       if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocityY) {
@@ -123,6 +125,19 @@ const updatePhysics = () => {
       }
 
       playerList[keys[i]].destY = playerList[keys[i]].prevY + playerList[keys[i]].velocityY;
+    }
+
+    // Update light radius
+    if (playerList[keys[i]].lightUp) {
+      // If the player is lighting up, increase light to max radius
+      if (playerList[keys[i]].lightRadius <= playerList[keys[i]].maxLight) {
+        playerList[keys[i]].lightRadius += 5;
+      }
+    } else {
+      // If the player isn't lighting up, decrease light to min radius
+      if (playerList[keys[i]].lightRadius >= playerList[keys[i]].minLight) {
+        playerList[keys[i]].lightRadius -= 5;
+      }
     }
 
     playerList[keys[i]].lastUpdate = new Date().getTime();
@@ -141,8 +156,6 @@ const playerJump = (player) => {
     playerList[player.hash].velocityY += playerList[player.hash].jumpHeight;
     playerList[player.hash].inAir = true;
     updatePhysics();
-  } else {
-    console.log(`velocity: ${playerList[player.hash].velocityY}`);
   }
 };
 
