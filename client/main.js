@@ -95,15 +95,19 @@ const init = () => {
   
   backgroundImage = document.querySelector('#background2');
   
-  collidableSprites['rock'] = document.querySelector('#rock');
-  rock = document.querySelector('#rock');
+  collidableSprites['blockS'] = document.querySelector('#blockS');
+  collidableSprites['blockT'] = document.querySelector('#blockT');
   
   for(let i = 2; i < 11; i++){
     let img = document.querySelector('#background'+i);
     let sprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
-    //let wrapSprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+    let wrapSprite = new BackgroundObject(-800,-280, 1638, 500, img, i-1);
+    
+    sprite.wrapObject = wrapSprite;
+    wrapSprite.wrapObject = sprite;
     
     backgrounds.push(sprite);
+    backgrounds.push(wrapSprite);
   }
 
   socket = io.connect();

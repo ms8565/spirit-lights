@@ -6,9 +6,11 @@ class BackgroundObject{
     this.height = height;
     this.image = image;
     this.depth = depth;
+    this.wrapObject;
   }
   draw(camera){
-    ctx.drawImage(this.image,  this.x - camera.localX*(1/this.depth) + camera.worldX, this.y);
+    
+    ctx.drawImage(this.image,  this.x - camera.gameX*(1/this.depth) + camera.canvasX, this.y);
   }
 }
 
@@ -21,7 +23,7 @@ class CollidableObject{
     this.image = image;
   }
   draw(camera){
-    ctx.drawImage(this.image,  this.x - camera.localX + camera.worldX, this.y);
+    ctx.drawImage(this.image,  this.x - camera.gameX + camera.canvasX, this.y);
   }
 }
 
@@ -77,8 +79,8 @@ const drawPlayer = (player, drawX) => {
         spriteSizes.HEIGHT * player.action,
         spriteSizes.WIDTH, 
         spriteSizes.HEIGHT,
-        drawX, 
-        player.y, 
+        drawX - spriteSizes.WIDTH/2, 
+        player.y - spriteSizes.HEIGHT/2, 
         spriteSizes.WIDTH, 
         spriteSizes.HEIGHT
       );
@@ -95,10 +97,10 @@ const drawPlayers = (camera) => {
     const player = players[keys[i]];
     
     //Draw player
-    drawPlayer(player, player.x - camera.localX + camera.worldX);
+    drawPlayer(player, player.x - camera.gameX + camera.canvasX);
     
     //highlight collision box for each character
-    ctx.strokeRect(player.x - camera.localX + camera.worldX, player.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 16, spriteSizes.WIDTH/2, spriteSizes.HEIGHT/2);
   }
 }
 
@@ -106,22 +108,23 @@ const drawBackground = (camera) => {
   for(let i = backgrounds.length; i > 0; i--) {
      
      backgrounds[i-1].draw(camera);
-  }  
+  }
 }
 
 const drawObjects = (camera) => {
+
   for(let i = 0; i < collidables.length; i++) {
     const collidable = collidables[i];
+    
     const img = collidableSprites[collidables[i].type];
     ctx.drawImage(img,  
-                  collidable.x - camera.localX + camera.worldX + collidable.width/2, 
-                  collidable.y + collidable.height/2,
-                  collidable.width,
-                  collidable.height
-                 );
+                  collidable.x - camera.gameX + camera.canvasX - collidable.width/2, 
+                  collidable.y - 8);
+                  //collidable.width,
+                  //collidable.height
+                 //);
     
   }
-  
   
 }
 
@@ -157,7 +160,7 @@ const setShadows = (camera) =>{
   
   for(let i = 0; i < keys.length; i++) {
     let player = players[[keys[i]]];
-    let drawX = player.x + player.width/2 - camera.localX + camera.worldX;
+    let drawX = player.x + player.width/2 - camera.gameX + camera.canvasX;
     
     let lightGrad = ctx2.createRadialGradient( drawX, player.y, player.lightRadius/2, drawX, player.y, player.lightRadius );
     
@@ -189,13 +192,13 @@ const redraw = (time) => {
   
   let player = players[hash];
   
-  let camera = {localX: player.x, worldX: canvas.width/2};
+  let camera = {gameX: player.x, canvasX: canvas.width/2};
   
-  if(camera.localX < canvas.width/2){
-    camera.localX = canvas.width/2;
+  if(camera.gameX < canvas.width/2){
+    camera.gameX = canvas.width/2;
   }
-  else if(camera.localX > 2000){
-    camera.localX = 2000;
+  else if(camera.gameX > 2000){
+    camera.gameX = 2000;
   }
   
   

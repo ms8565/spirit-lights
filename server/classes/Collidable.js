@@ -1,7 +1,7 @@
 
 // Collidable Object class
 class Collidable {
-  constructor(type, x, y, height, width) {
+  constructor(type, x, y, width, height) {
     this.type = type;
     this.x = x; // x location of collidable in game space
     this.y = y; // y location of collidable in game space

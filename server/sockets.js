@@ -3,16 +3,16 @@
 const xxh = require('xxhashjs');
 // Player class
 const Player = require('./classes/Player.js');
-// Collidable Object class
-const Collidable = require('./classes/Collidable.js');
 // our physics calculation file
 const physics = require('./physics.js');
+
+const LevelLoader = require('./levelLoader.js');
 
 // object of user characters
 let players = {};
 
 // List of collidable objects
-const collidables = [];
+let collidables = [];
 
 // let noncollidables = [];
 
@@ -38,10 +38,12 @@ const updatePhysics = (playerList) => {
 
 // Will only be done once, since all levels use the same objects
 const createLevel = (socket) => {
-  collidables.push(new Collidable('rock', 100, 400, 50, 50));
-  collidables.push(new Collidable('rock', 150, 400, 50, 50));
-  collidables.push(new Collidable('rock', 200, 400, 50, 50));
-  collidables.push(new Collidable('rock', 400, 400, 50, 50));
+  // collidables.push(new Collidable('rock', 100, 400, 50, 50));
+  // collidables.push(new Collidable('rock', 150, 400, 50, 50));
+  // collidables.push(new Collidable('rock', 200, 400, 50, 50));
+  // collidables.push(new Collidable('rock', 400, 400, 50, 50));
+
+  collidables = LevelLoader.createLevel();
 
   physics.setCollidablesList(collidables);
 

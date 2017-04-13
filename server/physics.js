@@ -7,6 +7,8 @@ let playerList = {}; // list of Players
 
 let collidables = [];
 
+const groundY = 420;
+
 // box collision check between two rectangles
 // of a set width/height
 const isColliding = (rect1, rect2) => {
@@ -76,7 +78,7 @@ const checkMoveY = (player) => {
   const newY = player.prevY + player.velocityY + 5;
 
   // If the player is below the ground
-  if (newY > 400) {
+  if (newY > groundY) {
     return true;
   }
 

@@ -24,9 +24,9 @@ class Player {
     this.lightRadius = 100;
     this.minLight = 100;
     this.maxLight = 200;
-    this.jumpHeight = -100;
+    this.jumpHeight = -120;
     this.fallSpeed = 8;
-    this.maxVelocityY = 12;
+    this.maxVelocityY = 16;
     this.velocityY = 0;
     this.velocityX = 0;
   }

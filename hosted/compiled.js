@@ -14,12 +14,14 @@ var BackgroundObject = function () {
     this.height = height;
     this.image = image;
     this.depth = depth;
+    this.wrapObject;
   }
 
   _createClass(BackgroundObject, [{
     key: 'draw',
     value: function draw(camera) {
-      ctx.drawImage(this.image, this.x - camera.localX * (1 / this.depth) + camera.worldX, this.y);
+
+      ctx.drawImage(this.image, this.x - camera.gameX * (1 / this.depth) + camera.canvasX, this.y);
     }
   }]);
 
@@ -40,7 +42,7 @@ var CollidableObject = function () {
   _createClass(CollidableObject, [{
     key: 'draw',
     value: function draw(camera) {
-      ctx.drawImage(this.image, this.x - camera.localX + camera.worldX, this.y);
+      ctx.drawImage(this.image, this.x - camera.gameX + camera.canvasX, this.y);
     }
   }]);
 
@@ -95,7 +97,7 @@ var drawPlayer = function drawPlayer(player, drawX) {
   }
 
   //draw our characters
-  ctx.drawImage(walkImage, spriteSizes.WIDTH * player.frame, spriteSizes.HEIGHT * player.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, drawX, player.y, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+  ctx.drawImage(walkImage, spriteSizes.WIDTH * player.frame, spriteSizes.HEIGHT * player.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, drawX - spriteSizes.WIDTH / 2, player.y - spriteSizes.HEIGHT / 2, spriteSizes.WIDTH, spriteSizes.HEIGHT);
 };
 
 var drawPlayers = function drawPlayers(camera) {
@@ -108,10 +110,10 @@ var drawPlayers = function drawPlayers(camera) {
     var player = players[keys[i]];
 
     //Draw player
-    drawPlayer(player, player.x - camera.localX + camera.worldX);
+    drawPlayer(player, player.x - camera.gameX + camera.canvasX);
 
     //highlight collision box for each character
-    ctx.strokeRect(player.x - camera.localX + camera.worldX, player.destY, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+    ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 16, spriteSizes.WIDTH / 2, spriteSizes.HEIGHT / 2);
   }
 };
 
@@ -123,10 +125,15 @@ var drawBackground = function drawBackground(camera) {
 };
 
 var drawObjects = function drawObjects(camera) {
+
   for (var i = 0; i < collidables.length; i++) {
     var collidable = collidables[i];
+
     var img = collidableSprites[collidables[i].type];
-    ctx.drawImage(img, collidable.x - camera.localX + camera.worldX + collidable.width / 2, collidable.y + collidable.height / 2, collidable.width, collidable.height);
+    ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX - collidable.width / 2, collidable.y - 8);
+    //collidable.width,
+    //collidable.height
+    //);
   }
 };
 
@@ -159,7 +166,7 @@ var setShadows = function setShadows(camera) {
 
   for (var i = 0; i < keys.length; i++) {
     var player = players[[keys[i]]];
-    var drawX = player.x + player.width / 2 - camera.localX + camera.worldX;
+    var drawX = player.x + player.width / 2 - camera.gameX + camera.canvasX;
 
     var lightGrad = ctx2.createRadialGradient(drawX, player.y, player.lightRadius / 2, drawX, player.y, player.lightRadius);
 
@@ -190,12 +197,12 @@ var redraw = function redraw(time) {
 
   var player = players[hash];
 
-  var camera = { localX: player.x, worldX: canvas.width / 2 };
+  var camera = { gameX: player.x, canvasX: canvas.width / 2 };
 
-  if (camera.localX < canvas.width / 2) {
-    camera.localX = canvas.width / 2;
-  } else if (camera.localX > 2000) {
-    camera.localX = 2000;
+  if (camera.gameX < canvas.width / 2) {
+    camera.gameX = canvas.width / 2;
+  } else if (camera.gameX > 2000) {
+    camera.gameX = 2000;
   }
 
   drawBackground(camera);
@@ -305,15 +312,19 @@ var init = function init() {
 
   backgroundImage = document.querySelector('#background2');
 
-  collidableSprites['rock'] = document.querySelector('#rock');
-  rock = document.querySelector('#rock');
+  collidableSprites['blockS'] = document.querySelector('#blockS');
+  collidableSprites['blockT'] = document.querySelector('#blockT');
 
   for (var i = 2; i < 11; i++) {
     var img = document.querySelector('#background' + i);
     var sprite = new BackgroundObject(0, -280, 1638, 500, img, i - 1);
-    //let wrapSprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+    var wrapSprite = new BackgroundObject(-800, -280, 1638, 500, img, i - 1);
+
+    sprite.wrapObject = wrapSprite;
+    wrapSprite.wrapObject = sprite;
 
     backgrounds.push(sprite);
+    backgrounds.push(wrapSprite);
   }
 
   socket = io.connect();
