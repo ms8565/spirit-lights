@@ -79,8 +79,8 @@ const drawPlayer = (player, drawX) => {
         spriteSizes.HEIGHT * player.action,
         spriteSizes.WIDTH, 
         spriteSizes.HEIGHT,
-        drawX - spriteSizes.WIDTH/2, 
-        player.y - spriteSizes.HEIGHT/2, 
+        drawX - 16, 
+        player.y - 32, 
         spriteSizes.WIDTH, 
         spriteSizes.HEIGHT
       );
@@ -100,7 +100,7 @@ const drawPlayers = (camera) => {
     drawPlayer(player, player.x - camera.gameX + camera.canvasX);
     
     //highlight collision box for each character
-    ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 16, spriteSizes.WIDTH/2, spriteSizes.HEIGHT/2);
+    //ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 32, spriteSizes.WIDTH/2, spriteSizes.HEIGHT/2);
   }
 }
 
@@ -118,7 +118,7 @@ const drawObjects = (camera) => {
     
     const img = collidableSprites[collidables[i].type];
     ctx.drawImage(img,  
-                  collidable.x - camera.gameX + camera.canvasX - collidable.width/2, 
+                  collidable.x - camera.gameX + camera.canvasX, 
                   collidable.y - 8);
                   //collidable.width,
                   //collidable.height
@@ -152,7 +152,7 @@ const setShadows = (camera) =>{
   //Create global shadow
   ctx2.globalCompositeOperation = 'source-over';
   ctx2.clearRect( 0, 0, canvas.width, canvas.height);
-  ctx2.fillStyle = 'rgba( 0, 0, 0, .7 )';
+  ctx2.fillStyle = 'rgba( 0, 0, 0, .9 )';
   ctx2.fillRect ( 0, 0, canvas.width, canvas.height );
   
   //Create light gradient for each player light

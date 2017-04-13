@@ -3,7 +3,7 @@ const Collidable = require('./classes/Collidable.js');
 
 const collidables = [];
 
-const groundY = 400;
+const groundY = 410;
 
 // Collidable(type, x, y, width, height)
 
@@ -23,25 +23,41 @@ const createTallBlock = (x) => {
   collidables.push(block);
 };
 
-/* const createSmallTree = (x) => {
-  const branchWidth = 80;
-  const branchHeight = 60;
-  const treeHeight = 120;
+const createShortBush = (x) => {
+  const bushWidth = 62;
+  const bushHeight = 50;
 
-  const tree = new Collidable('treeS', x, groundY + treeHeight, branchWidth, branchHeight);
+  const bush = new Collidable('bushS', x, groundY - 10, bushWidth, bushHeight);
+  collidables.push(bush);
+};
+
+const createTallBush = (x) => {
+  const bushWidth = 120;
+  const bushHeight = 100;
+
+  const bush = new Collidable('bushT', x, groundY - 60, bushWidth, bushHeight);
+  collidables.push(bush);
+};
+
+const createShortTree = (x) => {
+  const branchWidth = 50;
+  const branchHeight = 40;
+  const treeHeight = 125;
+
+  const tree = new Collidable('treeS', x, groundY - treeHeight / 2, branchWidth, branchHeight);
   collidables.push(tree);
 };
 
 const createTallTree = (x) => {
-  const branchWidth = 80;
-  const branchHeight = 60;
-  const treeHeight = 200;
+  const branchWidth = 50;
+  const branchHeight = 40;
+  // const treeHeight = 180;
 
-  const tree = new Collidable('treeT', x, groundY + treeHeight, branchWidth, branchHeight);
+  const tree = new Collidable('treeT', x, groundY - 120, branchWidth, branchHeight);
   collidables.push(tree);
 };
 
-const createSmallTrunkedTree = (x) => {
+/* const createSmallTrunkedTree = (x) => {
   // Create Trunk
   const trunkWidth = 40;
   const trunkHeight = 100;
@@ -92,9 +108,31 @@ const createLargeTrunkedTree = (x) => {
 };*/
 
 const createLevel = () => {
+  createTallTree(100);
+
+  // Level 1: Intro to blocks
   createShortBlock(200);
   createTallBlock(250);
   createShortBlock(300);
+
+  // Level 2: Intro to bushes
+  createShortBush(500);
+  createTallBush(570);
+  createShortBush(660);
+
+  // Level 3: First puzzle
+
+  // Level 4: Intro to trees
+  createShortBlock(850);
+  createShortTree(900);
+
+  createTallTree(1000);
+
+  // Level 4.5: Trees Puzzle
+
+  // Level 6: Intro to ponds
+
+  // Level 7: Ponds puzzle
 
   return collidables;
 };

@@ -97,7 +97,7 @@ var drawPlayer = function drawPlayer(player, drawX) {
   }
 
   //draw our characters
-  ctx.drawImage(walkImage, spriteSizes.WIDTH * player.frame, spriteSizes.HEIGHT * player.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, drawX - spriteSizes.WIDTH / 2, player.y - spriteSizes.HEIGHT / 2, spriteSizes.WIDTH, spriteSizes.HEIGHT);
+  ctx.drawImage(walkImage, spriteSizes.WIDTH * player.frame, spriteSizes.HEIGHT * player.action, spriteSizes.WIDTH, spriteSizes.HEIGHT, drawX - 16, player.y - 32, spriteSizes.WIDTH, spriteSizes.HEIGHT);
 };
 
 var drawPlayers = function drawPlayers(camera) {
@@ -113,7 +113,7 @@ var drawPlayers = function drawPlayers(camera) {
     drawPlayer(player, player.x - camera.gameX + camera.canvasX);
 
     //highlight collision box for each character
-    ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 16, spriteSizes.WIDTH / 2, spriteSizes.HEIGHT / 2);
+    //ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 32, spriteSizes.WIDTH/2, spriteSizes.HEIGHT/2);
   }
 };
 
@@ -130,7 +130,7 @@ var drawObjects = function drawObjects(camera) {
     var collidable = collidables[i];
 
     var img = collidableSprites[collidables[i].type];
-    ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX - collidable.width / 2, collidable.y - 8);
+    ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX, collidable.y - 8);
     //collidable.width,
     //collidable.height
     //);
@@ -158,7 +158,7 @@ var setShadows = function setShadows(camera) {
   //Create global shadow
   ctx2.globalCompositeOperation = 'source-over';
   ctx2.clearRect(0, 0, canvas.width, canvas.height);
-  ctx2.fillStyle = 'rgba( 0, 0, 0, .7 )';
+  ctx2.fillStyle = 'rgba( 0, 0, 0, .9 )';
   ctx2.fillRect(0, 0, canvas.width, canvas.height);
 
   //Create light gradient for each player light
@@ -312,8 +312,13 @@ var init = function init() {
 
   backgroundImage = document.querySelector('#background2');
 
+  collidableSprites['test'] = document.querySelector('#test');
   collidableSprites['blockS'] = document.querySelector('#blockS');
   collidableSprites['blockT'] = document.querySelector('#blockT');
+  collidableSprites['bushS'] = document.querySelector('#bushS');
+  collidableSprites['bushT'] = document.querySelector('#bushT');
+  collidableSprites['treeS'] = document.querySelector('#treeS');
+  collidableSprites['treeT'] = document.querySelector('#treeT');
 
   for (var i = 2; i < 11; i++) {
     var img = document.querySelector('#background' + i);

@@ -7,7 +7,7 @@ let playerList = {}; // list of Players
 
 let collidables = [];
 
-const groundY = 420;
+const groundY = 430;
 
 // box collision check between two rectangles
 // of a set width/height
