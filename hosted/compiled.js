@@ -158,7 +158,7 @@ var setShadows = function setShadows(camera) {
   //Create global shadow
   ctx2.globalCompositeOperation = 'source-over';
   ctx2.clearRect(0, 0, canvas.width, canvas.height);
-  ctx2.fillStyle = 'rgba( 0, 0, 0, .9 )';
+  ctx2.fillStyle = 'rgba( 0, 0, 0, .1 )';
   ctx2.fillRect(0, 0, canvas.width, canvas.height);
 
   //Create light gradient for each player light
@@ -319,6 +319,10 @@ var init = function init() {
   collidableSprites['bushT'] = document.querySelector('#bushT');
   collidableSprites['treeS'] = document.querySelector('#treeS');
   collidableSprites['treeT'] = document.querySelector('#treeT');
+  collidableSprites['trunk1'] = document.querySelector('#trunk1');
+  collidableSprites['trunk2'] = document.querySelector('#trunk2');
+  collidableSprites['branch1'] = document.querySelector('#branch1');
+  collidableSprites['branch2'] = document.querySelector('#branch2');
 
   for (var i = 2; i < 11; i++) {
     var img = document.querySelector('#background' + i);

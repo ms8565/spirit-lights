@@ -152,7 +152,7 @@ const setShadows = (camera) =>{
   //Create global shadow
   ctx2.globalCompositeOperation = 'source-over';
   ctx2.clearRect( 0, 0, canvas.width, canvas.height);
-  ctx2.fillStyle = 'rgba( 0, 0, 0, .9 )';
+  ctx2.fillStyle = 'rgba( 0, 0, 0, .1 )';
   ctx2.fillRect ( 0, 0, canvas.width, canvas.height );
   
   //Create light gradient for each player light

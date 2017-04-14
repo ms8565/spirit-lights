@@ -102,6 +102,10 @@ const init = () => {
   collidableSprites['bushT'] = document.querySelector('#bushT');
   collidableSprites['treeS'] = document.querySelector('#treeS');
   collidableSprites['treeT'] = document.querySelector('#treeT');
+  collidableSprites['trunk1'] = document.querySelector('#trunk1');
+  collidableSprites['trunk2'] = document.querySelector('#trunk2');
+  collidableSprites['branch1'] = document.querySelector('#branch1');
+  collidableSprites['branch2'] = document.querySelector('#branch2');
   
   for(let i = 2; i < 11; i++){
     let img = document.querySelector('#background'+i);

@@ -57,25 +57,51 @@ const createTallTree = (x) => {
   collidables.push(tree);
 };
 
-/* const createSmallTrunkedTree = (x) => {
+const createShortTrunkedTree = (x) => {
+    // Create Trunk
+  const trunkWidth = 50;
+  const trunkHeight = 80;
+  const trunk = new Collidable('trunk1',
+    x + 50,
+    groundY - 26,
+    trunkWidth,
+    trunkHeight);
+
+  // Create high, center branch
+  const branch1Width = 145;
+  const branch1Height = 100;
+  const branch1 = new Collidable('branch1',
+    x,
+    groundY - trunkHeight - 90,
+    branch1Width,
+    branch1Height);
+
+
+  collidables.push(trunk);
+  collidables.push(branch1);
+};
+
+ const createTallTrunkedTree = (x) => {
   // Create Trunk
-  const trunkWidth = 40;
-  const trunkHeight = 100;
-  const trunk = new Collidable('trunk', x, groundY, trunkWidth, trunkHeight);
+  const trunkWidth = 50;
+  const trunkHeight = 115;
+  const trunk = new Collidable('trunk2', x + 40, groundY - 50, trunkWidth, trunkHeight);
 
   // Create higher, center branch
-  const branch1Width = 75;
-  const branch1Height = 25;
+  const branch1Width = 145;
+  const branch1Height = 100;
   const branch1 = new Collidable('branch1',
-    x, groundY + trunkHeight - 20,
+    x,
+    groundY - trunkHeight - 80,
     branch1Width,
     branch1Height);
 
   // Create lower, right branch
-  const branch2Width = 50;
-  const branch2Height = 25;
+  const branch2Width = 90;
+  const branch2Height = 45;
   const branch2 = new Collidable('branch2',
-    x, groundY + trunkHeight - 50,
+    x + 90, 
+    groundY - trunkHeight + 10,
     branch2Width,
     branch2Height);
 
@@ -84,33 +110,10 @@ const createTallTree = (x) => {
   collidables.push(branch2);
 };
 
-const createLargeTrunkedTree = (x) => {
-    // Create Trunk
-  const trunkWidth = 50;
-  const trunkHeight = 150;
-  const trunk = new Collidable('trunk',
-    x,
-    groundY,
-    trunkWidth,
-    trunkHeight);
 
-  // Create high, center branch
-  const branch1Width = 80;
-  const branch1Height = 40;
-  const branch1 = new Collidable('branch1',
-    x, groundY + trunkHeight - 20,
-    branch1Width,
-    branch1Height);
-
-
-  collidables.push(trunk);
-  collidables.push(branch1);
-};*/
 
 const createLevel = () => {
-  createTallTree(100);
-
-  // Level 1: Intro to blocks
+  /*// Level 1: Intro to blocks
   createShortBlock(200);
   createTallBlock(250);
   createShortBlock(300);
@@ -126,7 +129,13 @@ const createLevel = () => {
   createShortBlock(850);
   createShortTree(900);
 
-  createTallTree(1000);
+  createTallTree(1000);*/
+  
+  createShortTree(200);
+  createTallTree(300);
+  
+  createShortTrunkedTree(700);
+  createTallTrunkedTree(400);
 
   // Level 4.5: Trees Puzzle
 
