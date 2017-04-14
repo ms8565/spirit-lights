@@ -117,12 +117,23 @@ const drawObjects = (camera) => {
     const collidable = collidables[i];
     
     const img = collidableSprites[collidables[i].type];
-    ctx.drawImage(img,  
+    
+    //Hot fix for offset bug due to x/y being at 0,0
+    if(collidable.type === 'branch1'){
+      ctx.drawImage(img,  
+                  collidable.x - camera.gameX + camera.canvasX, 
+                  collidable.y - 40);
+    }
+    else if(collidable.type === 'branch2'){
+      ctx.drawImage(img,  
+                  collidable.x - camera.gameX + camera.canvasX, 
+                  collidable.y - 20);
+    }
+    else{
+      ctx.drawImage(img,  
                   collidable.x - camera.gameX + camera.canvasX, 
                   collidable.y - 8);
-                  //collidable.width,
-                  //collidable.height
-                 //);
+    }
     
   }
   

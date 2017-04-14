@@ -1,3 +1,4 @@
+'use strict';
 
 // fast hashing library
 const xxh = require('xxhashjs');
@@ -13,6 +14,9 @@ let players = {};
 
 // List of collidable objects
 let collidables = [];
+
+let nonCollidables = [];
+let waypoints = [];
 
 // let noncollidables = [];
 
@@ -31,6 +35,18 @@ let io;
 
 const updatePhysics = (playerList) => {
   players = playerList;
+  
+  const keys = Object.keys(players);
+  //If the player is dead, respawn them
+  for (let i = 0; i < keys.length; i++) {
+  
+    if(players[keys[i]].dead){
+      const pHash = players[keys[i]].hash
+      const wPoint = players[keys[i]].lastWaypoint;
+      
+      io.sockets.in('room1').emit('respawnPlayer', {hash: pHash, waypoint: wPoint});
+    }
+  }
 
     // Update all player physics
   io.sockets.in('room1').emit('updatePhysics', { updatedPlayers: playerList });
@@ -38,16 +54,50 @@ const updatePhysics = (playerList) => {
 
 // Will only be done once, since all levels use the same objects
 const createLevel = (socket) => {
-  // collidables.push(new Collidable('rock', 100, 400, 50, 50));
-  // collidables.push(new Collidable('rock', 150, 400, 50, 50));
-  // collidables.push(new Collidable('rock', 200, 400, 50, 50));
-  // collidables.push(new Collidable('rock', 400, 400, 50, 50));
-
-  collidables = LevelLoader.createLevel();
+  LevelLoader.createLevel();
+  
+  collidables = LevelLoader.getCollidables();
+  nonCollidables = LevelLoader.getNonCollidables();
+  waypoints = LevelLoader.getWaypoints();
 
   physics.setCollidablesList(collidables);
 
   socket.emit('createLevel', { collidableObjs: collidables });
+};
+
+const checkWaypoints = (hash) => {
+  //Check if player is at the end of the game 
+  //Aka, the last waypoint
+  if(players[hash].x > waypoints[waypoints.length-1]){
+    const keys = Object.keys(players);
+    
+    //Check if another player is at the end
+     for (let i = 0; i < keys.length; i++) {
+       const otherPlayer = players[[keys[i]]];
+       
+       //If it's not the current player
+       if(otherPlayer.hash !== hash){
+         
+         //Check if another player is past the last waypoint
+         if(otherPlayer.x > waypoints[waypoints.length-1]){
+           console.log("END OF GAME");
+         }
+       }
+     }
+  }
+  
+  //Loop through the other waypoints
+  for(let i = waypoints.length-1; i > 0; i--){
+    const waypoint = waypoints[i-1];
+    if(players[hash].x > waypoint){
+      //If the player is past the waypoint
+      //Set that as the last waypoint
+      players[hash].lastWaypoint = waypoint;
+      console.log("New waypoint: "+waypoint);
+      break;
+    }
+  }
+  
 };
 
 /* const loadMap = () => {
@@ -98,6 +148,8 @@ const setupSockets = (ioServer) => {
         // Player is not colliding on x axis
         players[socket.hash].destX = players[socket.hash].prevX + players[socket.hash].velocityX;
       }
+      
+      checkWaypoints(socket.hash);
 
 
       // update timestamp of last change for this character

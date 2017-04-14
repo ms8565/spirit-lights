@@ -1,4 +1,4 @@
-
+'use strict';
 
 // our socket code for physics to send updates back
 const sockets = require('./sockets.js');
@@ -42,7 +42,7 @@ const checkPlayerCollisions = (player1Rect, hash) => {
 };
 
 // check if player is colliding with objects
-const checkObjectCollisions = (playerRect) => {
+const checkObjectCollisions = (playerRect, hash) => {
   for (let i = 0; i < collidables.length; i++) {
     const collidableRect = { x: collidables[i].x,
       y: collidables[i].y,
@@ -50,6 +50,9 @@ const checkObjectCollisions = (playerRect) => {
       height: collidables[i].height };
 
     if (isColliding(playerRect, collidableRect)) {
+      if(collidables[i].type === 'pondS' || collidables[i].type === 'pondL'){
+        playerList[hash].dead = true;
+      }
       return true;
     }
   }
@@ -67,7 +70,7 @@ const checkMoveX = (player) => {
 
   if (checkPlayerCollisions(player1, player.hash)) return true;
 
-  if (checkObjectCollisions(player1)) return true;
+  if (checkObjectCollisions(player1, player.hash)) return true;
 
   return false;
 };
@@ -89,10 +92,12 @@ const checkMoveY = (player) => {
 
   if (checkPlayerCollisions(player1, player.hash)) return true;
 
-  if (checkObjectCollisions(player1)) return true;
+  if (checkObjectCollisions(player1, player.hash)) return true;
 
   return false;
 };
+
+
 
 
 // update player list
@@ -141,7 +146,10 @@ const updatePhysics = () => {
         playerList[keys[i]].lightRadius -= 5;
       }
     }
-
+    
+    //Update the last waypoint the player has passed
+    
+    
     playerList[keys[i]].lastUpdate = new Date().getTime();
   }
   sockets.updatePhysics(playerList);

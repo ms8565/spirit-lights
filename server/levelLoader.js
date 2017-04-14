@@ -1,7 +1,10 @@
+'use strict';
 // Collidable Object class
 const Collidable = require('./classes/Collidable.js');
 
 const collidables = [];
+const nonCollidables = [];
+const waypoints = [];
 
 const groundY = 410;
 
@@ -68,11 +71,11 @@ const createShortTrunkedTree = (x) => {
     trunkHeight);
 
   // Create high, center branch
-  const branch1Width = 145;
-  const branch1Height = 100;
+  const branch1Width = 135;
+  const branch1Height = 80;
   const branch1 = new Collidable('branch1',
     x,
-    groundY - trunkHeight - 90,
+    groundY - trunkHeight - 60,
     branch1Width,
     branch1Height);
 
@@ -88,11 +91,11 @@ const createShortTrunkedTree = (x) => {
   const trunk = new Collidable('trunk2', x + 40, groundY - 50, trunkWidth, trunkHeight);
 
   // Create higher, center branch
-  const branch1Width = 145;
-  const branch1Height = 100;
+  const branch1Width = 135;
+  const branch1Height = 80;
   const branch1 = new Collidable('branch1',
     x,
-    groundY - trunkHeight - 80,
+    groundY - trunkHeight - 50,
     branch1Width,
     branch1Height);
 
@@ -101,7 +104,7 @@ const createShortTrunkedTree = (x) => {
   const branch2Height = 45;
   const branch2 = new Collidable('branch2',
     x + 90, 
-    groundY - trunkHeight + 10,
+    groundY - trunkHeight + 30,
     branch2Width,
     branch2Height);
 
@@ -110,6 +113,15 @@ const createShortTrunkedTree = (x) => {
   collidables.push(branch2);
 };
 
+const createSmallPond = (x) => {
+  const pondWidth = 500;
+  const pondHeight = 100;
+
+  const pond = new Collidable('pondS', x, groundY + 30, pondWidth, pondHeight);
+  collidables.push(pond);
+};
+
+
 
 
 const createLevel = () => {
@@ -117,6 +129,7 @@ const createLevel = () => {
   createShortBlock(200);
   createTallBlock(250);
   createShortBlock(300);
+  
 
   // Level 2: Intro to bushes
   createShortBush(500);
@@ -131,19 +144,41 @@ const createLevel = () => {
 
   createTallTree(1000);*/
   
-  createShortTree(200);
-  createTallTree(300);
+  createShortBush(250);
+  createTallBush(300);
+  createTallTree(400);
   
-  createShortTrunkedTree(700);
-  createTallTrunkedTree(400);
+  createTallTree(600);
+  
+  createTallTree(800);
+  
+  createSmallPond(400)
+  
+  waypoints.push(100);
+  waypoints.push(200);
+  waypoints.push(600);
+  waypoints.push(800);
 
   // Level 4.5: Trees Puzzle
 
   // Level 6: Intro to ponds
 
   // Level 7: Ponds puzzle
-
-  return collidables;
 };
 
+const getCollidables = () => {
+  return collidables;
+}
+
+const getNonCollidables = () => {
+  return nonCollidables;
+}
+
+const getWaypoints = () => {
+  return waypoints;
+}
+
+module.exports.getCollidables = getCollidables;
+module.exports.getNonCollidables = getNonCollidables;
+module.exports.getWaypoints = getWaypoints;
 module.exports.createLevel = createLevel;

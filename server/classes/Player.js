@@ -1,4 +1,4 @@
-
+'use strict';
 
 // Player class
 class Player {
@@ -7,7 +7,7 @@ class Player {
     // last time this character was updated
     this.lastUpdate = new Date().getTime();
     this.x = 0; // x location of character on screen
-    this.y = 0; // y location of character on screen
+    this.y = 450; // y location of character on screen
     this.prevX = 0; // last known x location of character
     this.prevY = 0; // last known y location of character
     this.destX = 0; // destination x location of character
@@ -29,6 +29,8 @@ class Player {
     this.maxVelocityY = 16;
     this.velocityY = 0;
     this.velocityX = 0;
+    this.dead = false;
+    this.lastWaypoint = 0;
   }
 }
 

@@ -106,6 +106,9 @@ const init = () => {
   collidableSprites['trunk2'] = document.querySelector('#trunk2');
   collidableSprites['branch1'] = document.querySelector('#branch1');
   collidableSprites['branch2'] = document.querySelector('#branch2');
+  collidableSprites['pondS'] = document.querySelector('#pond1');
+  collidableSprites['pondL'] = document.querySelector('#pond2');
+  collidableSprites['lilypad'] = document.querySelector('#lilypad');
   
   for(let i = 2; i < 11; i++){
     let img = document.querySelector('#background'+i);
@@ -126,9 +129,19 @@ const init = () => {
   socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
   socket.on('createLevel', createLevel);
+  socket.on('respawnPlayer', respawnPlayer);
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
 };
+
+const respawnPlayer = (data) => {
+  const hash = data.hash;
+  const lastWayPoint = data.waypoint;
+  
+  players[hash].x = lastWayPoint;
+  players[hash].prevX = lastWayPoint;
+  players[hash].destX = lastWayPoint;
+}
 
 window.onload = init;

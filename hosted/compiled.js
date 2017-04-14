@@ -130,10 +130,15 @@ var drawObjects = function drawObjects(camera) {
     var collidable = collidables[i];
 
     var img = collidableSprites[collidables[i].type];
-    ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX, collidable.y - 8);
-    //collidable.width,
-    //collidable.height
-    //);
+
+    //Hot fix for offset bug due to x/y being at 0,0
+    if (collidable.type === 'branch1') {
+      ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX, collidable.y - 40);
+    } else if (collidable.type === 'branch2') {
+      ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX, collidable.y - 20);
+    } else {
+      ctx.drawImage(img, collidable.x - camera.gameX + camera.canvasX, collidable.y - 8);
+    }
   }
 };
 
@@ -323,6 +328,9 @@ var init = function init() {
   collidableSprites['trunk2'] = document.querySelector('#trunk2');
   collidableSprites['branch1'] = document.querySelector('#branch1');
   collidableSprites['branch2'] = document.querySelector('#branch2');
+  collidableSprites['pondS'] = document.querySelector('#pond1');
+  collidableSprites['pondL'] = document.querySelector('#pond2');
+  collidableSprites['lilypad'] = document.querySelector('#lilypad');
 
   for (var i = 2; i < 11; i++) {
     var img = document.querySelector('#background' + i);
@@ -343,9 +351,19 @@ var init = function init() {
   socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
   socket.on('createLevel', createLevel);
+  socket.on('respawnPlayer', respawnPlayer);
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
+};
+
+var respawnPlayer = function respawnPlayer(data) {
+  var hash = data.hash;
+  var lastWayPoint = data.waypoint;
+
+  players[hash].x = lastWayPoint;
+  players[hash].prevX = lastWayPoint;
+  players[hash].destX = lastWayPoint;
 };
 
 window.onload = init;
@@ -477,7 +495,7 @@ var updatePosition = function updatePosition() {
   /*player.destY+= player.velocityY;
   if(player.destY <= 0) player.destY = 1;
   if(player.destY >= 400) player.destY = 399;
-   //if user is moving left, decrease x
+    //if user is moving left, decrease x
   if(player.moveLeft && player.destX > 0) {
     console.log("moving left");
     player.destX -= 2;

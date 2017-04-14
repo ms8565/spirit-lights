@@ -1,4 +1,4 @@
-
+'use strict';
 // Collidable Object class
 class Collidable {
   constructor(type, x, y, width, height) {
