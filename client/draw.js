@@ -170,6 +170,7 @@ const lerpPlayers = () => {
   for(let i = 0; i < keys.length; i++) {
     const player = players[keys[i]];
     
+    
     if(player.alpha < 1) player.alpha += 0.05;
     player.x = lerp(player.prevX, player.destX, player.alpha);
     player.y = lerp(player.prevY, player.destY, player.alpha);

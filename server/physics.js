@@ -3,7 +3,8 @@
 // our socket code for physics to send updates back
 const sockets = require('./sockets.js');
 
-let playerList = {}; // list of Players
+let rooms = {};
+//let playerList = {}; // list of Players
 
 let collidables = [];
 
@@ -22,10 +23,11 @@ const isColliding = (rect1, rect2) => {
 };
 
 // check if player is colliding with other players
-const checkPlayerCollisions = (player1Rect, hash) => {
-  const keys = Object.keys(playerList);
-  const players = playerList;
-
+const checkPlayerCollisions = (player1Rect, hash, roomName) => {
+  
+  const players = rooms[roomName].players;
+  const keys = Object.keys(players);
+  
   for (let i = 0; i < keys.length; i++) {
     const player2Rect = { x: players[keys[i]].x,
       y: players[keys[i]].y,
@@ -42,7 +44,9 @@ const checkPlayerCollisions = (player1Rect, hash) => {
 };
 
 // check if player is colliding with objects
-const checkObjectCollisions = (playerRect, hash) => {
+const checkObjectCollisions = (playerRect, hash, roomName) => {
+  const players = rooms[roomName].players;
+  
   for (let i = 0; i < collidables.length; i++) {
     const collidableRect = { x: collidables[i].x,
       y: collidables[i].y,
@@ -51,7 +55,7 @@ const checkObjectCollisions = (playerRect, hash) => {
 
     if (isColliding(playerRect, collidableRect)) {
       if(collidables[i].type === 'pondS' || collidables[i].type === 'pondL'){
-        playerList[hash].dead = true;
+        players[hash].dead = true;
       }
       return true;
     }
@@ -60,7 +64,7 @@ const checkObjectCollisions = (playerRect, hash) => {
 };
 
 // Check if new X update would cause the player to collide
-const checkMoveX = (player) => {
+const checkMoveX = (player, roomName) => {
   const newX = player.prevX + player.velocityX;
 
   const player1 = { x: newX,
@@ -68,16 +72,16 @@ const checkMoveX = (player) => {
     width: player.width,
     height: player.height };
 
-  if (checkPlayerCollisions(player1, player.hash)) return true;
+  if (checkPlayerCollisions(player1, player.hash, roomName)) return true;
 
-  if (checkObjectCollisions(player1, player.hash)) return true;
+  if (checkObjectCollisions(player1, player.hash, roomName)) return true;
 
   return false;
 };
 
 
 // Check if new Y update would cause the player to collide
-const checkMoveY = (player) => {
+const checkMoveY = (player, roomName) => {
   const newY = player.prevY + player.velocityY + 5;
 
   // If the player is below the ground
@@ -90,19 +94,22 @@ const checkMoveY = (player) => {
     width: player.width,
     height: player.height };
 
-  if (checkPlayerCollisions(player1, player.hash)) return true;
+  if (checkPlayerCollisions(player1, player.hash, roomName)) return true;
 
-  if (checkObjectCollisions(player1, player.hash)) return true;
+  if (checkObjectCollisions(player1, player.hash, roomName)) return true;
 
   return false;
 };
 
 
-
+// update rooms list
+const setRoomList = (newRoomList) => {
+  rooms = newRoomList;
+};
 
 // update player list
-const setPlayerList = (newPlayerList) => {
-  playerList = newPlayerList;
+const setPlayerList = (newPlayerList, roomName) => {
+  rooms[roomName].players = newPlayerList;
 };
 
 const setCollidablesList = (newCollidables) => {
@@ -110,62 +117,73 @@ const setCollidablesList = (newCollidables) => {
 };
 
 // update a player
-const setPlayer = (player) => {
-  playerList[player.hash] = player;
+const setPlayer = (player, roomName) => {
+  
+  rooms[roomName].players[player.hash] = player;
 };
 
-const updatePhysics = () => {
+const updatePhysics = (roomName) => {
+  
+  const players = rooms[roomName].players;
+  
   // gravity update physics
-  const keys = Object.keys(playerList);
+  const keys = Object.keys(players);
   for (let i = 0; i < keys.length; i++) {
     // Check if next update of gravity will make the player collide
-    if (checkMoveY(playerList[keys[i]])) {
+    if (checkMoveY(players[keys[i]], roomName)) {
         // Player will collide on y axis
-      playerList[keys[i]].velocityY = 0;
-      playerList[keys[i]].destY = playerList[keys[i]].prevY;
+      players[keys[i]].velocityY = 0;
+      players[keys[i]].destY = players[keys[i]].prevY;
     } else {
       // Otherwise update position with gravity
-      playerList[keys[i]].velocityY += playerList[keys[i]].fallSpeed;
-
-      if (playerList[keys[i]].velocityY > playerList[keys[i]].maxVelocityY) {
-        playerList[keys[i]].velocityY = playerList[keys[i]].maxVelocityY;
+      players[keys[i]].velocityY += players[keys[i]].fallSpeed;
+      
+      if (players[keys[i]].velocityY > players[keys[i]].maxVelocityY) {
+        players[keys[i]].velocityY = players[keys[i]].maxVelocityY;
       }
 
-      playerList[keys[i]].destY = playerList[keys[i]].prevY + playerList[keys[i]].velocityY;
+      players[keys[i]].destY = players[keys[i]].prevY + players[keys[i]].velocityY;
     }
 
     // Update light radius
-    if (playerList[keys[i]].lightUp) {
+    if (players[keys[i]].lightUp) {
       // If the player is lighting up, increase light to max radius
-      if (playerList[keys[i]].lightRadius <= playerList[keys[i]].maxLight) {
-        playerList[keys[i]].lightRadius += 5;
+      if (players[keys[i]].lightRadius <= players[keys[i]].maxLight) {
+        players[keys[i]].lightRadius += 5;
       }
     } else {
       // If the player isn't lighting up, decrease light to min radius
-      if (playerList[keys[i]].lightRadius >= playerList[keys[i]].minLight) {
-        playerList[keys[i]].lightRadius -= 5;
+      if (players[keys[i]].lightRadius >= players[keys[i]].minLight) {
+        players[keys[i]].lightRadius -= 5;
       }
     }
     
     //Update the last waypoint the player has passed
     
     
-    playerList[keys[i]].lastUpdate = new Date().getTime();
+    players[keys[i]].lastUpdate = new Date().getTime();
   }
-  sockets.updatePhysics(playerList);
+  sockets.updatePhysics(players, roomName);
 };
 
 // Update players every 20ms
 setInterval(() => {
-  updatePhysics();
+  //Update physics for every room
+  const keys = Object.keys(rooms);
+  for (let i = 0; i < keys.length; i++) {
+    updatePhysics(keys[i]);
+  }
+  
 }, 20);
 
-const playerJump = (player) => {
+const playerJump = (player, roomName) => {
+  const players = rooms[roomName].players;
+  
   // If the player isn't in the air
-  if (playerList[player.hash].velocityY === 0) {
-    playerList[player.hash].velocityY += playerList[player.hash].jumpHeight;
-    playerList[player.hash].inAir = true;
-    updatePhysics();
+  if (players[player.hash].velocityY === 0) {
+    players[player.hash].velocityY += players[player.hash].jumpHeight;
+    players[player.hash].inAir = true;
+    updatePhysics(roomName);
   }
 };
 
@@ -174,3 +192,4 @@ module.exports.setCollidablesList = setCollidablesList;
 module.exports.setPlayer = setPlayer;
 module.exports.playerJump = playerJump;
 module.exports.checkMoveX = checkMoveX;
+module.exports.setRoomList = setRoomList;
