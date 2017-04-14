@@ -62,7 +62,7 @@ const createLevel = (socket) => {
 
   physics.setCollidablesList(collidables);
 
-  socket.emit('createLevel', { collidableObjs: collidables });
+  socket.emit('createLevel', { collidableObjs: collidables, wayPoints: waypoints });
 };
 
 const checkWaypoints = (hash) => {
@@ -93,7 +93,6 @@ const checkWaypoints = (hash) => {
       //If the player is past the waypoint
       //Set that as the last waypoint
       players[hash].lastWaypoint = waypoint;
-      console.log("New waypoint: "+waypoint);
       break;
     }
   }

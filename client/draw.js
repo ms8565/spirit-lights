@@ -1,3 +1,7 @@
+let sunRising = true;
+let dawnOpacity = 0;
+let darknessLevel = .8;
+
 class BackgroundObject{
   constructor(x, y,width,height,image,depth){
     this.x = x;
@@ -6,11 +10,19 @@ class BackgroundObject{
     this.height = height;
     this.image = image;
     this.depth = depth;
-    this.wrapObject;
+    this.dawnImage = waypointImage;
   }
   draw(camera){
-    
     ctx.drawImage(this.image,  this.x - camera.gameX*(1/this.depth) + camera.canvasX, this.y);
+    
+    //If the player has reached the end of the game
+    //Fade in dawn images
+    if(sunRising){
+      ctx.save();
+      ctx.globalAlpha = dawnOpacity;
+      ctx.drawImage(this.dawnImage,  this.x - camera.gameX*(1/this.depth) + camera.canvasX, this.y);
+      ctx.restore();
+    }
   }
 }
 
@@ -85,7 +97,7 @@ const drawPlayer = (player, drawX) => {
         spriteSizes.HEIGHT
       );
   
-}
+};
 
 const drawPlayers = (camera) => {
   //each user id
@@ -102,14 +114,23 @@ const drawPlayers = (camera) => {
     //highlight collision box for each character
     //ctx.strokeRect(player.x - camera.gameX + camera.canvasX - 16, player.destY - 32, spriteSizes.WIDTH/2, spriteSizes.HEIGHT/2);
   }
-}
+};
 
 const drawBackground = (camera) => {
   for(let i = backgrounds.length; i > 0; i--) {
      
      backgrounds[i-1].draw(camera);
   }
-}
+};
+
+const drawWaypoints = (camera) => {
+    for(let i = 0; i < collidables.length; i++) {
+      let drawX = waypoints[i] - camera.gameX + camera.canvasX;
+      
+      ctx.drawImage(waypointImage, drawX, 390);
+      
+    }
+};
 
 const drawObjects = (camera) => {
 
@@ -137,11 +158,11 @@ const drawObjects = (camera) => {
     
   }
   
-}
+};
 
 const drawForeground = () => {
   
-}
+};
 const lerpPlayers = () => {
   //each user id
   const keys = Object.keys(players);
@@ -154,7 +175,7 @@ const lerpPlayers = () => {
     player.y = lerp(player.prevY, player.destY, player.alpha);
     
   }
-}
+};
 
 const setShadows = (camera) =>{
   
@@ -163,7 +184,7 @@ const setShadows = (camera) =>{
   //Create global shadow
   ctx2.globalCompositeOperation = 'source-over';
   ctx2.clearRect( 0, 0, canvas.width, canvas.height);
-  ctx2.fillStyle = 'rgba( 0, 0, 0, .1 )';
+  ctx2.fillStyle = 'rgba( 0, 0, 0,'+darknessLevel+' )';
   ctx2.fillRect ( 0, 0, canvas.width, canvas.height );
   
   //Create light gradient for each player light
@@ -175,7 +196,7 @@ const setShadows = (camera) =>{
     
     let lightGrad = ctx2.createRadialGradient( drawX, player.y, player.lightRadius/2, drawX, player.y, player.lightRadius );
     
-    lightGrad.addColorStop(  0, 'rgba( 200, 50, 80,  1 )' );
+    lightGrad.addColorStop(  0, 'rgba( 200, 50, 80,  .8 )' );
       lightGrad.addColorStop( .8, 'rgba( 100, 50, 80, .1 )' );
       lightGrad.addColorStop(  1, 'rgba( 0, 0, 0,  0 )' );
     
@@ -183,13 +204,40 @@ const setShadows = (camera) =>{
     ctx2.fillStyle = lightGrad;
     ctx2.fillRect(drawX-player.lightRadius, player.y - player.lightRadius, player.lightRadius*2, player.lightRadius*2 );
     
+    //Draw colored light
     if(players[keys[i]].lightUp){
       ctx2.globalCompositeOperation = 'source-atop';
       ctx2.fillStyle = lightGrad;
       ctx2.fillRect(drawX-player.lightRadius, player.y - player.lightRadius, player.lightRadius*2, player.lightRadius*2 );
     }
   }
-}
+  
+  //Create light gradient for each waypoint
+  for(let i = 0; i < 5; i++) {
+    let drawX = waypoints[i] - camera.gameX + camera.canvasX + 20;
+    
+    //If the lantern is onscreen or close to it
+    if((drawX < canvas.width + 100) && (drawX > -100) ){
+      let drawY = 420;
+      let radius = 50;
+    
+      let lightGrad = ctx2.createRadialGradient( drawX, drawY, radius/2, drawX, drawY, radius );
+    
+      lightGrad.addColorStop(  0, 'rgba( 6, 193, 147,  .7 )' );
+      lightGrad.addColorStop( .4, 'rgba( 6, 193, 147, .4 )' );
+      lightGrad.addColorStop(  1, 'rgba( 0, 0, 0,  0 )' );
+    
+      ctx2.globalCompositeOperation = 'destination-out';
+      ctx2.fillStyle = lightGrad;
+      ctx2.fillRect(drawX - radius, drawY - radius, radius*2, radius*2 );
+    
+      //Draw colored light
+      ctx2.globalCompositeOperation = 'source-atop';
+      ctx2.fillStyle = lightGrad;
+      ctx2.fillRect(drawX - radius, drawY - radius, radius*2, radius*2 );
+    }
+  }
+};
 
 //redraw with requestAnimationFrame
 const redraw = (time) => {
@@ -212,10 +260,14 @@ const redraw = (time) => {
     camera.gameX = 2000;
   }
   
-  
+  if(sunRising){
+    dawnOpacity+=.005;
+    darknessLevel-=.005;
+  }
   
   
   drawBackground(camera);
+  drawWaypoints(camera);
   drawObjects(camera);
   drawPlayers(camera);
   

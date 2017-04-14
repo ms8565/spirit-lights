@@ -73,6 +73,15 @@ const updatePhysics = (data) => {
   }
 }
 
+const respawnPlayer = (data) => {
+  const hash = data.hash;
+  const lastWayPoint = data.waypoint;
+  
+  players[hash].x = lastWayPoint;
+  players[hash].prevX = lastWayPoint;
+  players[hash].destX = lastWayPoint;
+}
+
 //function to remove a character from our character list
 const removeUser = (data) => {
   //if we have that character, remove them

@@ -4,6 +4,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
+var sunRising = true;
+var dawnOpacity = 0;
+var darknessLevel = .8;
+
 var BackgroundObject = function () {
   function BackgroundObject(x, y, width, height, image, depth) {
     _classCallCheck(this, BackgroundObject);
@@ -14,14 +18,22 @@ var BackgroundObject = function () {
     this.height = height;
     this.image = image;
     this.depth = depth;
-    this.wrapObject;
+    this.dawnImage = waypointImage;
   }
 
   _createClass(BackgroundObject, [{
     key: 'draw',
     value: function draw(camera) {
-
       ctx.drawImage(this.image, this.x - camera.gameX * (1 / this.depth) + camera.canvasX, this.y);
+
+      //If the player has reached the end of the game
+      //Fade in dawn images
+      if (sunRising) {
+        ctx.save();
+        ctx.globalAlpha = dawnOpacity;
+        ctx.drawImage(this.dawnImage, this.x - camera.gameX * (1 / this.depth) + camera.canvasX, this.y);
+        ctx.restore();
+      }
     }
   }]);
 
@@ -124,6 +136,14 @@ var drawBackground = function drawBackground(camera) {
   }
 };
 
+var drawWaypoints = function drawWaypoints(camera) {
+  for (var i = 0; i < collidables.length; i++) {
+    var drawX = waypoints[i] - camera.gameX + camera.canvasX;
+
+    ctx.drawImage(waypointImage, drawX, 390);
+  }
+};
+
 var drawObjects = function drawObjects(camera) {
 
   for (var i = 0; i < collidables.length; i++) {
@@ -163,7 +183,7 @@ var setShadows = function setShadows(camera) {
   //Create global shadow
   ctx2.globalCompositeOperation = 'source-over';
   ctx2.clearRect(0, 0, canvas.width, canvas.height);
-  ctx2.fillStyle = 'rgba( 0, 0, 0, .1 )';
+  ctx2.fillStyle = 'rgba( 0, 0, 0,' + darknessLevel + ' )';
   ctx2.fillRect(0, 0, canvas.width, canvas.height);
 
   //Create light gradient for each player light
@@ -175,7 +195,7 @@ var setShadows = function setShadows(camera) {
 
     var lightGrad = ctx2.createRadialGradient(drawX, player.y, player.lightRadius / 2, drawX, player.y, player.lightRadius);
 
-    lightGrad.addColorStop(0, 'rgba( 200, 50, 80,  1 )');
+    lightGrad.addColorStop(0, 'rgba( 200, 50, 80,  .8 )');
     lightGrad.addColorStop(.8, 'rgba( 100, 50, 80, .1 )');
     lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
 
@@ -183,10 +203,37 @@ var setShadows = function setShadows(camera) {
     ctx2.fillStyle = lightGrad;
     ctx2.fillRect(drawX - player.lightRadius, player.y - player.lightRadius, player.lightRadius * 2, player.lightRadius * 2);
 
+    //Draw colored light
     if (players[keys[i]].lightUp) {
       ctx2.globalCompositeOperation = 'source-atop';
       ctx2.fillStyle = lightGrad;
       ctx2.fillRect(drawX - player.lightRadius, player.y - player.lightRadius, player.lightRadius * 2, player.lightRadius * 2);
+    }
+  }
+
+  //Create light gradient for each waypoint
+  for (var _i = 0; _i < 5; _i++) {
+    var _drawX = waypoints[_i] - camera.gameX + camera.canvasX + 20;
+
+    //If the lantern is onscreen or close to it
+    if (_drawX < canvas.width + 100 && _drawX > -100) {
+      var drawY = 420;
+      var _radius = 50;
+
+      var _lightGrad = ctx2.createRadialGradient(_drawX, drawY, _radius / 2, _drawX, drawY, _radius);
+
+      _lightGrad.addColorStop(0, 'rgba( 6, 193, 147,  .7 )');
+      _lightGrad.addColorStop(.4, 'rgba( 6, 193, 147, .4 )');
+      _lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+
+      ctx2.globalCompositeOperation = 'destination-out';
+      ctx2.fillStyle = _lightGrad;
+      ctx2.fillRect(_drawX - _radius, drawY - _radius, _radius * 2, _radius * 2);
+
+      //Draw colored light
+      ctx2.globalCompositeOperation = 'source-atop';
+      ctx2.fillStyle = _lightGrad;
+      ctx2.fillRect(_drawX - _radius, drawY - _radius, _radius * 2, _radius * 2);
     }
   }
 };
@@ -210,7 +257,13 @@ var redraw = function redraw(time) {
     camera.gameX = 2000;
   }
 
+  if (sunRising) {
+    dawnOpacity += .005;
+    darknessLevel -= .005;
+  }
+
   drawBackground(camera);
+  drawWaypoints(camera);
   drawObjects(camera);
   drawPlayers(camera);
 
@@ -227,6 +280,7 @@ var ctx = void 0;
 var ctx2 = void 0;
 var walkImage = void 0; //spritesheet for player
 var backgroundImage = void 0; //image for background
+var waypointImage = void 0; //image for background
 
 var backgrounds = [];
 //our websocket connection 
@@ -238,6 +292,7 @@ var players = {}; //player list
 
 var collidables = [];
 var collidableSprites = {};
+var waypoints = [];
 
 var rock = void 0;
 
@@ -295,14 +350,8 @@ var onKeyUp = function onKeyUp(e) {
 };
 
 var createLevel = function createLevel(data) {
-  /*const collidableObjs = data.collidableObjs;
-  for(var i = 0; i < collidableObjs.length; i++){
-    let x = collidableObjs[i].x;
-    let y = collidableObjs[i].y;
-    
-    collidables.push(new CollidableObject(collidableObjs))
-  }*/
   collidables = data.collidableObjs;
+  waypoints = data.wayPoints;
 };
 
 var init = function init() {
@@ -332,17 +381,22 @@ var init = function init() {
   collidableSprites['pondL'] = document.querySelector('#pond2');
   collidableSprites['lilypad'] = document.querySelector('#lilypad');
 
+  waypointImage = document.querySelector('#lantern');
+
+  //background3_Dawn
   for (var i = 2; i < 11; i++) {
     var img = document.querySelector('#background' + i);
-    var sprite = new BackgroundObject(0, -280, 1638, 500, img, i - 1);
-    var wrapSprite = new BackgroundObject(-800, -280, 1638, 500, img, i - 1);
+    //let dawnImg = document.querySelector('#background3_Dawn');
 
-    sprite.wrapObject = wrapSprite;
-    wrapSprite.wrapObject = sprite;
+    var sprite = new BackgroundObject(0, -280, 1638, 500, img, i - 1);
+    //sprite.dawnImage = dawnImg;
+    var wrapSprite = new BackgroundObject(-800, -280, 1638, 500, img, i - 1);
 
     backgrounds.push(sprite);
     backgrounds.push(wrapSprite);
   }
+  backgrounds[2].image = document.querySelector('#background3_Dawn');
+  backgrounds[2].dawnImage = document.querySelector('#background3');
 
   socket = io.connect();
 
@@ -355,15 +409,6 @@ var init = function init() {
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
-};
-
-var respawnPlayer = function respawnPlayer(data) {
-  var hash = data.hash;
-  var lastWayPoint = data.waypoint;
-
-  players[hash].x = lastWayPoint;
-  players[hash].prevX = lastWayPoint;
-  players[hash].destX = lastWayPoint;
 };
 
 window.onload = init;
@@ -440,6 +485,15 @@ var updatePhysics = function updatePhysics(data) {
 
     updatedPlayer.alpha = 0.05;
   }
+};
+
+var respawnPlayer = function respawnPlayer(data) {
+  var hash = data.hash;
+  var lastWayPoint = data.waypoint;
+
+  players[hash].x = lastWayPoint;
+  players[hash].prevX = lastWayPoint;
+  players[hash].destX = lastWayPoint;
 };
 
 //function to remove a character from our character list

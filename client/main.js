@@ -4,6 +4,7 @@ let ctx;
 let ctx2;
 let walkImage; //spritesheet for player
 let backgroundImage; //image for background
+let waypointImage; //image for background
 
 let backgrounds = [];
 //our websocket connection 
@@ -15,6 +16,7 @@ let players = {}; //player list
 
 let collidables = [];
 let collidableSprites = {};
+let waypoints = [];
 
 let rock;
 
@@ -73,15 +75,10 @@ const onKeyUp = (e) => {
 };
 
 const createLevel = (data) => {
-  /*const collidableObjs = data.collidableObjs;
-  for(var i = 0; i < collidableObjs.length; i++){
-    let x = collidableObjs[i].x;
-    let y = collidableObjs[i].y;
-    
-    collidables.push(new CollidableObject(collidableObjs))
-  }*/
   collidables = data.collidableObjs;
+  waypoints = data.wayPoints;
 }
+
 
 const init = () => {
   walkImage = document.querySelector('#walk');
@@ -110,17 +107,22 @@ const init = () => {
   collidableSprites['pondL'] = document.querySelector('#pond2');
   collidableSprites['lilypad'] = document.querySelector('#lilypad');
   
+  waypointImage = document.querySelector('#lantern');
+  
+  //background3_Dawn
   for(let i = 2; i < 11; i++){
     let img = document.querySelector('#background'+i);
-    let sprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
-    let wrapSprite = new BackgroundObject(-800,-280, 1638, 500, img, i-1);
+    //let dawnImg = document.querySelector('#background3_Dawn');
     
-    sprite.wrapObject = wrapSprite;
-    wrapSprite.wrapObject = sprite;
+    let sprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+    //sprite.dawnImage = dawnImg;
+    let wrapSprite = new BackgroundObject(-800,-280, 1638, 500, img, i-1);
     
     backgrounds.push(sprite);
     backgrounds.push(wrapSprite);
   }
+  backgrounds[2].image = document.querySelector('#background3_Dawn');
+  backgrounds[2].dawnImage = document.querySelector('#background3');
 
   socket = io.connect();
 
@@ -135,13 +137,6 @@ const init = () => {
   window.addEventListener('keyup', onKeyUp);
 };
 
-const respawnPlayer = (data) => {
-  const hash = data.hash;
-  const lastWayPoint = data.waypoint;
-  
-  players[hash].x = lastWayPoint;
-  players[hash].prevX = lastWayPoint;
-  players[hash].destX = lastWayPoint;
-}
+
 
 window.onload = init;
