@@ -1,4 +1,4 @@
-'use strict';
+
 
 // fast hashing library
 const xxh = require('xxhashjs');
@@ -10,14 +10,15 @@ const Room = require('./classes/Room.js');
 const physics = require('./physics.js');
 
 const LevelLoader = require('./levelLoader.js');
+let objectsLoaded = false;
 
-//List of player rooms
+// List of player rooms
 const rooms = {};
 
 // List of collidable objects
 let collidables = [];
 
-let nonCollidables = [];
+// let nonCollidables = [];
 let waypoints = [];
 
 // let noncollidables = [];
@@ -38,16 +39,15 @@ let io;
 const updatePhysics = (playerList, roomName) => {
   rooms[roomName].players = playerList;
   const players = rooms[roomName].players;
-  
+
   const keys = Object.keys(players);
-  //If the player is dead, respawn them
+  // If the player is dead, respawn them
   for (let i = 0; i < keys.length; i++) {
-  
-    if(players[keys[i]].dead){
-      const pHash = players[keys[i]].hash
+    if (players[keys[i]].dead) {
+      const pHash = players[keys[i]].hash;
       const wPoint = players[keys[i]].lastWaypoint;
-      
-      io.sockets.in(roomName).emit('respawnPlayer', {hash: pHash, waypoint: wPoint});
+
+      io.sockets.in(roomName).emit('respawnPlayer', { hash: pHash, waypoint: wPoint });
     }
   }
 
@@ -58,10 +58,13 @@ const updatePhysics = (playerList, roomName) => {
 // Will only be done once, since all levels use the same objects
 const createLevel = (socket) => {
   LevelLoader.createLevel();
-  
-  collidables = LevelLoader.getCollidables();
-  nonCollidables = LevelLoader.getNonCollidables();
-  waypoints = LevelLoader.getWaypoints();
+
+  if (!objectsLoaded) {
+    collidables = LevelLoader.getCollidables();
+    // nonCollidables = LevelLoader.getNonCollidables();
+    waypoints = LevelLoader.getWaypoints();
+    objectsLoaded = true;
+  }
 
   physics.setCollidablesList(collidables);
 
@@ -71,89 +74,84 @@ const createLevel = (socket) => {
 const checkWaypoints = (socket) => {
   const hash = socket.hash;
   const room = rooms[socket.roomName];
-  //Check if player is at the end of the game 
-  //Aka, the last waypoint
-  if(room.players[hash].x > waypoints[waypoints.length-1]){
+  // Check if player is at the end of the game
+  // Aka, the last waypoint
+  if (room.players[hash].x > waypoints[waypoints.length - 1]) {
     const keys = Object.keys(room.players);
-    
-    //Check if another player is at the end
-     for (let i = 0; i < keys.length; i++) {
-       const otherPlayer = room.players[[keys[i]]];
-       
-       //If it's not the current player
-       if(otherPlayer.hash !== hash){
-         
-         //Check if another player is past the last waypoint
-         if(otherPlayer.x > waypoints[waypoints.length-1]){
-           socket.emit('endGame', null);
-         }
-       }
-     }
+
+    // Check if another player is at the end
+    for (let i = 0; i < keys.length; i++) {
+      const otherPlayer = room.players[[keys[i]]];
+
+       // If it's not the current player
+      if (otherPlayer.hash !== hash) {
+         // Check if another player is past the last waypoint
+        if (otherPlayer.x > waypoints[waypoints.length - 1]) {
+          socket.emit('endGame', null);
+        }
+      }
+    }
   }
-  
-  //Loop through the other waypoints
-  for(let i = waypoints.length-1; i > 0; i--){
-    const waypoint = waypoints[i-1];
-    if(room.players[hash].x > waypoint){
-      //If the player is past the waypoint
-      //Set that as the last waypoint
+
+  // Loop through the other waypoints
+  for (let i = waypoints.length - 1; i > 0; i--) {
+    const waypoint = waypoints[i - 1];
+    if (room.players[hash].x > waypoint) {
+      // If the player is past the waypoint
+      // Set that as the last waypoint
       room.players[hash].lastWaypoint = waypoint;
       break;
     }
   }
-  
 };
 
 
-
-
-const addUserToRoom = (sock, hash) =>{
+const addUserToRoom = (sock) => {
   const socket = sock;
-  
+
   let added = false;
-  
+
   const keys = Object.keys(rooms);
 
   for (let i = 0; i < keys.length; i++) {
-    //Check if a room has an open spot 
-    if(rooms[keys[i]].numUsers < 2){
-       socket.roomName = keys[i];
-       rooms[keys[i]].numUsers++;
-      
-       added = true;
-     }
+    // Check if a room has an open spot
+    if (rooms[keys[i]].numUsers < 2) {
+      socket.roomName = keys[i];
+      rooms[keys[i]].numUsers++;
+
+      added = true;
+    }
   }
-  //If there weren't any rooms open, make a new one
-  if(!added){
-    let roomName = 'Room'+rooms.length;
+  // If there weren't any rooms open, make a new one
+  if (!added) {
+    const roomName = `Room${rooms.length}`;
     socket.roomName = roomName;
     rooms[roomName] = new Room(roomName);
   }
-
-}
+};
 
 // function to setup our socket server
 const setupSockets = (ioServer) => {
   // set our io server instance
   io = ioServer;
-  
+
 
   // on socket connections
   io.on('connection', (sock) => {
     const socket = sock;
-    
+
     createLevel(socket);
-    
+
     // create a unique id for the user based on the socket id and time
     const hash = xxh.h32(`${socket.id}${new Date().getTime()}`, 0xCAFEBABE).toString(16);
-    
+
     // add the id to the user's socket object for quick reference
     socket.hash = hash;
-    
-    addUserToRoom(socket)
+
+    addUserToRoom(socket);
 
     socket.join(socket.roomName);
-    
+
     const room = rooms[socket.roomName];
 
     // create a new character and store it by its unique id
@@ -177,10 +175,10 @@ const setupSockets = (ioServer) => {
         // Player is not colliding on x axis
         const prevX = room.players[socket.hash].prevX;
         const velocityX = room.players[socket.hash].velocityX;
-        
+
         room.players[socket.hash].destX = prevX + velocityX;
       }
-      
+
       checkWaypoints(socket);
 
 
@@ -205,10 +203,10 @@ const setupSockets = (ioServer) => {
 
       io.sockets.in(socket.roomName).emit('updateMovement', room.players[socket.hash]);
     });
-    socket.on('respawn', (data) => {
+    socket.on('respawn', () => {
       const wPoint = room.players[socket.hash].lastWaypoint;
-      
-      io.sockets.in(socket.roomName).emit('respawnPlayer', {hash: socket.hash, waypoint: wPoint});
+
+      io.sockets.in(socket.roomName).emit('respawnPlayer', { hash: socket.hash, waypoint: wPoint });
     });
 
     socket.on('disconnect', () => {
@@ -216,11 +214,11 @@ const setupSockets = (ioServer) => {
 
       delete room.players[socket.hash];
       room.numUsers--;
-            
+
       physics.setPlayerList(room.players, socket.roomName);
-      
-      //if the room is now empty, delete it
-      if(room.numUsers <= 0){
+
+      // if the room is now empty, delete it
+      if (room.numUsers <= 0) {
         delete rooms[socket.roomName];
         physics.setRoomList(rooms);
       }

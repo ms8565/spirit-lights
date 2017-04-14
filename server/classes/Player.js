@@ -1,4 +1,4 @@
-'use strict';
+
 
 // Player class
 class Player {
@@ -6,7 +6,7 @@ class Player {
     this.hash = hash; // character's unique id
     // last time this character was updated
     this.lastUpdate = new Date().getTime();
-    this.x = 4000; // x location of character on screen
+    this.x = 100; // x location of character on screen
     this.y = 450; // y location of character on screen
     this.prevX = 0; // last known x location of character
     this.prevY = 0; // last known y location of character

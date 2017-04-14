@@ -6,8 +6,10 @@ let walkImage; //spritesheet for player
 let backgroundImage; //image for background
 let waypointImage; //shrine image
 let endingImage;
+let shrineImage;
 
 let backgrounds = [];
+let foregrounds = [];
 //our websocket connection 
 let socket; 
 let hash; //user's unique id (from the server)
@@ -22,10 +24,10 @@ let waypoints = [];
 //Variables for the sunrise at the end
 let sunRising = false;
 let dawnOpacity = 0;
-let darknessLevel = .8;
+let darknessLevel = .9;
 let endFadeIn = 0;
 
-const levelWidth = 8000;
+const levelWidth = 4600;
 
 var KEYBOARD = {
 	"KEY_D": 68, 
@@ -91,17 +93,7 @@ const createLevel = (data) => {
   waypoints = data.wayPoints;
 }
 
-
-const init = () => {
-  walkImage = document.querySelector('#walk');
-  backgroundImage = document.querySelector('#background2');
-  
-  canvas = document.querySelector('#canvas');
-  ctx = canvas.getContext('2d');
-  
-  canvas2 = document.querySelector('#canvas2');
-  ctx2 = canvas2.getContext('2d');
-  
+const loadObjects = () => {
   backgroundImage = document.querySelector('#background2');
   
   collidableSprites['test'] = document.querySelector('#test');
@@ -121,21 +113,61 @@ const init = () => {
   
   waypointImage = document.querySelector('#lantern');
   endingImage = document.querySelector('#endingImage');
+  shrineImage = document.querySelector('#shrine');
   
-  //background3_Dawn
+  //Create background objects
   for(let i = 2; i < 11; i++){
     let img = document.querySelector('#background'+i);
     //let dawnImg = document.querySelector('#background3_Dawn');
     
-    let sprite = new BackgroundObject(0,-280, 1638, 500, img, i-1);
+    let sprite = new BackgroundObject(-928,-280, 928, 500, img, i-1);
+    let sprite1 = new BackgroundObject(0,-280, 928, 500, img, i-1);
+    let sprite2 = new BackgroundObject(928,-280, 928, 500, img, i-1);
+    let sprite3 = new BackgroundObject(1856,-280, 928, 500, img, i-1);
+    let sprite4 = new BackgroundObject(2784,-280, 928, 500, img, i-1);
+    let sprite5 = new BackgroundObject(3712,-280, 928, 500, img, i-1);
     //sprite.dawnImage = dawnImg;
-    let wrapSprite = new BackgroundObject(-800,-280, 1638, 500, img, i-1);
+    //let wrapSprite = new BackgroundObject(-800,-280, 928, 500, img, i-1);
     
     backgrounds.push(sprite);
-    backgrounds.push(wrapSprite);
+    backgrounds.push(sprite1);
+    backgrounds.push(sprite2);
+    backgrounds.push(sprite3);
+    backgrounds.push(sprite4);
+    backgrounds.push(sprite5);
+    //backgrounds.push(wrapSprite);
   }
-  backgrounds[2].image = document.querySelector('#background3_Dawn');
-  backgrounds[2].dawnImage = document.querySelector('#background3');
+  
+  //Create foreground objects
+  let img = document.querySelector('#background1');
+  let sprite = new BackgroundObject(-928,-280, 928, 500, img, 1);
+  let sprite1 = new BackgroundObject(0,-280, 928, 500, img, 1);
+  let sprite2 = new BackgroundObject(928,-280, 928, 500, img, 1);
+  let sprite3 = new BackgroundObject(1856,-280, 928, 500, img, 1);
+  let sprite4 = new BackgroundObject(2784,-280, 928, 500, img, 1);
+  let sprite5 = new BackgroundObject(3712,-280, 928, 500, img, 1);
+  foregrounds.push(sprite);
+  foregrounds.push(sprite1);
+  foregrounds.push(sprite2);
+  foregrounds.push(sprite3);
+  foregrounds.push(sprite4);
+  foregrounds.push(sprite5);
+  
+  
+}
+
+
+const init = () => {
+  walkImage = document.querySelector('#walk');
+  backgroundImage = document.querySelector('#background2');
+  
+  canvas = document.querySelector('#canvas');
+  ctx = canvas.getContext('2d');
+  
+  canvas2 = document.querySelector('#canvas2');
+  ctx2 = canvas2.getContext('2d');
+  
+  loadObjects();
 
   socket = io.connect();
 

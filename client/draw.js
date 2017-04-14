@@ -44,10 +44,10 @@ class CollidableObject{
 //to integers for fast/small storage
 const actions = {
   IDLE: 0,
-  LEFT: 2,
-  RIGHT: 1,
-  JUMP: 3,
-  LIGHTUP: 4
+  LEFT: 3,
+  RIGHT: 2,
+  JUMP: 4,
+  LIGHTUP: 1
 };
 
 //size of our character sprites
@@ -130,6 +130,8 @@ const drawWaypoints = (camera) => {
       ctx.drawImage(waypointImage, drawX, 390);
       
     }
+  let drawX = 4300 - camera.gameX + camera.canvasX;
+  ctx.drawImage(shrineImage, drawX, 300);
 };
 
 const drawObjects = (camera) => {
@@ -160,9 +162,13 @@ const drawObjects = (camera) => {
   
 };
 
-const drawForeground = () => {
-  
+const drawForeground = (camera) => {
+  for(let i = foregrounds.length; i > 0; i--) {
+     foregrounds[i-1].draw(camera);
+  }
 };
+
+
 const lerpPlayers = () => {
   //each user id
   const keys = Object.keys(players);
@@ -197,7 +203,7 @@ const setShadows = (camera) =>{
     
     let lightGrad = ctx2.createRadialGradient( drawX, player.y, player.lightRadius/2, drawX, player.y, player.lightRadius );
     
-    lightGrad.addColorStop(  0, 'rgba( 200, 50, 80,  .8 )' );
+    lightGrad.addColorStop(  0, 'rgba( 6, 193, 180,  .8 )' );
       lightGrad.addColorStop( .8, 'rgba( 100, 50, 80, .1 )' );
       lightGrad.addColorStop(  1, 'rgba( 0, 0, 0,  0 )' );
     
@@ -214,7 +220,8 @@ const setShadows = (camera) =>{
   }
   
   //Create light gradient for each waypoint
-  for(let i = 0; i < waypoints.length; i++) {
+  for(let i = 0; i < 6; i++) {
+    
     let drawX = waypoints[i] - camera.gameX + camera.canvasX + 20;
     
     //If the lantern is onscreen or close to it
@@ -238,6 +245,24 @@ const setShadows = (camera) =>{
       ctx2.fillRect(drawX - radius, drawY - radius, radius*2, radius*2 );
     }
   }
+  let drawXShrine = 4400 - camera.gameX + camera.canvasX;
+  let drawYShrine = 420;
+  let radiusShrine = 200;
+
+  let lightGrad = ctx2.createRadialGradient( drawXShrine, drawYShrine, radiusShrine/2, drawXShrine, drawYShrine, radiusShrine );
+
+  lightGrad.addColorStop(  0, 'rgba( 244, 200, 66,  .7 )' );
+  lightGrad.addColorStop( .4, 'rgba(244, 200, 66, .4 )' );
+  lightGrad.addColorStop(  1, 'rgba( 0, 0, 0,  0 )' );
+
+  ctx2.globalCompositeOperation = 'destination-out';
+  ctx2.fillStyle = lightGrad;
+  ctx2.fillRect(drawXShrine - radiusShrine, drawYShrine - radiusShrine, radiusShrine*2, radiusShrine*2 );
+
+  //Draw colored light
+  ctx2.globalCompositeOperation = 'source-atop';
+  ctx2.fillStyle = lightGrad;
+  ctx2.fillRect(drawXShrine - radiusShrine, drawYShrine - radiusShrine, radiusShrine*2, radiusShrine*2 );
 };
 
 
@@ -267,6 +292,7 @@ const redraw = (time) => {
   drawWaypoints(camera);
   drawObjects(camera);
   drawPlayers(camera);
+  drawForeground(camera);
   
   
   setShadows(camera);

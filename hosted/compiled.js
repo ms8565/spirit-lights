@@ -68,10 +68,10 @@ var CollidableObject = function () {
 
 var actions = {
   IDLE: 0,
-  LEFT: 2,
-  RIGHT: 1,
-  JUMP: 3,
-  LIGHTUP: 4
+  LEFT: 3,
+  RIGHT: 2,
+  JUMP: 4,
+  LIGHTUP: 1
 };
 
 //size of our character sprites
@@ -138,10 +138,12 @@ var drawBackground = function drawBackground(camera) {
 
 var drawWaypoints = function drawWaypoints(camera) {
   for (var i = 0; i < collidables.length; i++) {
-    var drawX = waypoints[i] - camera.gameX + camera.canvasX;
+    var _drawX = waypoints[i] - camera.gameX + camera.canvasX;
 
-    ctx.drawImage(waypointImage, drawX, 390);
+    ctx.drawImage(waypointImage, _drawX, 390);
   }
+  var drawX = 4300 - camera.gameX + camera.canvasX;
+  ctx.drawImage(shrineImage, drawX, 300);
 };
 
 var drawObjects = function drawObjects(camera) {
@@ -162,7 +164,12 @@ var drawObjects = function drawObjects(camera) {
   }
 };
 
-var drawForeground = function drawForeground() {};
+var drawForeground = function drawForeground(camera) {
+  for (var i = foregrounds.length; i > 0; i--) {
+    foregrounds[i - 1].draw(camera);
+  }
+};
+
 var lerpPlayers = function lerpPlayers() {
   //each user id
   var keys = Object.keys(players);
@@ -193,49 +200,68 @@ var setShadows = function setShadows(camera) {
     var player = players[[keys[i]]];
     var drawX = player.x + player.width / 2 - camera.gameX + camera.canvasX;
 
-    var lightGrad = ctx2.createRadialGradient(drawX, player.y, player.lightRadius / 2, drawX, player.y, player.lightRadius);
+    var _lightGrad = ctx2.createRadialGradient(drawX, player.y, player.lightRadius / 2, drawX, player.y, player.lightRadius);
 
-    lightGrad.addColorStop(0, 'rgba( 200, 50, 80,  .8 )');
-    lightGrad.addColorStop(.8, 'rgba( 100, 50, 80, .1 )');
-    lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+    _lightGrad.addColorStop(0, 'rgba( 6, 193, 180,  .8 )');
+    _lightGrad.addColorStop(.8, 'rgba( 100, 50, 80, .1 )');
+    _lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
 
     ctx2.globalCompositeOperation = 'destination-out';
-    ctx2.fillStyle = lightGrad;
+    ctx2.fillStyle = _lightGrad;
     ctx2.fillRect(drawX - player.lightRadius, player.y - player.lightRadius, player.lightRadius * 2, player.lightRadius * 2);
 
     //Draw colored light
     if (players[keys[i]].lightUp) {
       ctx2.globalCompositeOperation = 'source-atop';
-      ctx2.fillStyle = lightGrad;
+      ctx2.fillStyle = _lightGrad;
       ctx2.fillRect(drawX - player.lightRadius, player.y - player.lightRadius, player.lightRadius * 2, player.lightRadius * 2);
     }
   }
 
   //Create light gradient for each waypoint
-  for (var _i = 0; _i < waypoints.length; _i++) {
-    var _drawX = waypoints[_i] - camera.gameX + camera.canvasX + 20;
+  for (var _i = 0; _i < 6; _i++) {
+
+    var _drawX2 = waypoints[_i] - camera.gameX + camera.canvasX + 20;
 
     //If the lantern is onscreen or close to it
-    if (_drawX < canvas.width + 100 && _drawX > -100) {
+    if (_drawX2 < canvas.width + 100 && _drawX2 > -100) {
       var drawY = 420;
       var _radius = 50;
 
-      var _lightGrad = ctx2.createRadialGradient(_drawX, drawY, _radius / 2, _drawX, drawY, _radius);
+      var _lightGrad2 = ctx2.createRadialGradient(_drawX2, drawY, _radius / 2, _drawX2, drawY, _radius);
 
-      _lightGrad.addColorStop(0, 'rgba( 6, 193, 147,  .7 )');
-      _lightGrad.addColorStop(.4, 'rgba( 6, 193, 147, .4 )');
-      _lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+      _lightGrad2.addColorStop(0, 'rgba( 6, 193, 147,  .7 )');
+      _lightGrad2.addColorStop(.4, 'rgba( 6, 193, 147, .4 )');
+      _lightGrad2.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
 
       ctx2.globalCompositeOperation = 'destination-out';
-      ctx2.fillStyle = _lightGrad;
-      ctx2.fillRect(_drawX - _radius, drawY - _radius, _radius * 2, _radius * 2);
+      ctx2.fillStyle = _lightGrad2;
+      ctx2.fillRect(_drawX2 - _radius, drawY - _radius, _radius * 2, _radius * 2);
 
       //Draw colored light
       ctx2.globalCompositeOperation = 'source-atop';
-      ctx2.fillStyle = _lightGrad;
-      ctx2.fillRect(_drawX - _radius, drawY - _radius, _radius * 2, _radius * 2);
+      ctx2.fillStyle = _lightGrad2;
+      ctx2.fillRect(_drawX2 - _radius, drawY - _radius, _radius * 2, _radius * 2);
     }
   }
+  var drawXShrine = 4400 - camera.gameX + camera.canvasX;
+  var drawYShrine = 420;
+  var radiusShrine = 200;
+
+  var lightGrad = ctx2.createRadialGradient(drawXShrine, drawYShrine, radiusShrine / 2, drawXShrine, drawYShrine, radiusShrine);
+
+  lightGrad.addColorStop(0, 'rgba( 244, 200, 66,  .7 )');
+  lightGrad.addColorStop(.4, 'rgba(244, 200, 66, .4 )');
+  lightGrad.addColorStop(1, 'rgba( 0, 0, 0,  0 )');
+
+  ctx2.globalCompositeOperation = 'destination-out';
+  ctx2.fillStyle = lightGrad;
+  ctx2.fillRect(drawXShrine - radiusShrine, drawYShrine - radiusShrine, radiusShrine * 2, radiusShrine * 2);
+
+  //Draw colored light
+  ctx2.globalCompositeOperation = 'source-atop';
+  ctx2.fillStyle = lightGrad;
+  ctx2.fillRect(drawXShrine - radiusShrine, drawYShrine - radiusShrine, radiusShrine * 2, radiusShrine * 2);
 };
 
 //redraw with requestAnimationFrame
@@ -261,6 +287,7 @@ var redraw = function redraw(time) {
   drawWaypoints(camera);
   drawObjects(camera);
   drawPlayers(camera);
+  drawForeground(camera);
 
   setShadows(camera);
 
@@ -291,8 +318,10 @@ var walkImage = void 0; //spritesheet for player
 var backgroundImage = void 0; //image for background
 var waypointImage = void 0; //shrine image
 var endingImage = void 0;
+var shrineImage = void 0;
 
 var backgrounds = [];
+var foregrounds = [];
 //our websocket connection 
 var socket = void 0;
 var hash = void 0; //user's unique id (from the server)
@@ -307,10 +336,10 @@ var waypoints = [];
 //Variables for the sunrise at the end
 var sunRising = false;
 var dawnOpacity = 0;
-var darknessLevel = .8;
+var darknessLevel = .9;
 var endFadeIn = 0;
 
-var levelWidth = 8000;
+var levelWidth = 4600;
 
 var KEYBOARD = {
   "KEY_D": 68,
@@ -375,16 +404,7 @@ var createLevel = function createLevel(data) {
   waypoints = data.wayPoints;
 };
 
-var init = function init() {
-  walkImage = document.querySelector('#walk');
-  backgroundImage = document.querySelector('#background2');
-
-  canvas = document.querySelector('#canvas');
-  ctx = canvas.getContext('2d');
-
-  canvas2 = document.querySelector('#canvas2');
-  ctx2 = canvas2.getContext('2d');
-
+var loadObjects = function loadObjects() {
   backgroundImage = document.querySelector('#background2');
 
   collidableSprites['test'] = document.querySelector('#test');
@@ -404,21 +424,58 @@ var init = function init() {
 
   waypointImage = document.querySelector('#lantern');
   endingImage = document.querySelector('#endingImage');
+  shrineImage = document.querySelector('#shrine');
 
-  //background3_Dawn
+  //Create background objects
   for (var i = 2; i < 11; i++) {
-    var img = document.querySelector('#background' + i);
+    var _img = document.querySelector('#background' + i);
     //let dawnImg = document.querySelector('#background3_Dawn');
 
-    var sprite = new BackgroundObject(0, -280, 1638, 500, img, i - 1);
+    var _sprite = new BackgroundObject(-928, -280, 928, 500, _img, i - 1);
+    var _sprite2 = new BackgroundObject(0, -280, 928, 500, _img, i - 1);
+    var _sprite3 = new BackgroundObject(928, -280, 928, 500, _img, i - 1);
+    var _sprite4 = new BackgroundObject(1856, -280, 928, 500, _img, i - 1);
+    var _sprite5 = new BackgroundObject(2784, -280, 928, 500, _img, i - 1);
+    var _sprite6 = new BackgroundObject(3712, -280, 928, 500, _img, i - 1);
     //sprite.dawnImage = dawnImg;
-    var wrapSprite = new BackgroundObject(-800, -280, 1638, 500, img, i - 1);
+    //let wrapSprite = new BackgroundObject(-800,-280, 928, 500, img, i-1);
 
-    backgrounds.push(sprite);
-    backgrounds.push(wrapSprite);
+    backgrounds.push(_sprite);
+    backgrounds.push(_sprite2);
+    backgrounds.push(_sprite3);
+    backgrounds.push(_sprite4);
+    backgrounds.push(_sprite5);
+    backgrounds.push(_sprite6);
+    //backgrounds.push(wrapSprite);
   }
-  backgrounds[2].image = document.querySelector('#background3_Dawn');
-  backgrounds[2].dawnImage = document.querySelector('#background3');
+
+  //Create foreground objects
+  var img = document.querySelector('#background1');
+  var sprite = new BackgroundObject(-928, -280, 928, 500, img, 1);
+  var sprite1 = new BackgroundObject(0, -280, 928, 500, img, 1);
+  var sprite2 = new BackgroundObject(928, -280, 928, 500, img, 1);
+  var sprite3 = new BackgroundObject(1856, -280, 928, 500, img, 1);
+  var sprite4 = new BackgroundObject(2784, -280, 928, 500, img, 1);
+  var sprite5 = new BackgroundObject(3712, -280, 928, 500, img, 1);
+  foregrounds.push(sprite);
+  foregrounds.push(sprite1);
+  foregrounds.push(sprite2);
+  foregrounds.push(sprite3);
+  foregrounds.push(sprite4);
+  foregrounds.push(sprite5);
+};
+
+var init = function init() {
+  walkImage = document.querySelector('#walk');
+  backgroundImage = document.querySelector('#background2');
+
+  canvas = document.querySelector('#canvas');
+  ctx = canvas.getContext('2d');
+
+  canvas2 = document.querySelector('#canvas2');
+  ctx2 = canvas2.getContext('2d');
+
+  loadObjects();
 
   socket = io.connect();
 
