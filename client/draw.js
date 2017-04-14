@@ -1,4 +1,4 @@
-let sunRising = true;
+let sunRising = false;
 let dawnOpacity = 0;
 let darknessLevel = .8;
 
@@ -240,13 +240,15 @@ const setShadows = (camera) =>{
   }
 };
 
+
+
 //redraw with requestAnimationFrame
 const redraw = (time) => {
   //update this user's positions
   updatePosition();
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+
   
   lerpPlayers();
   
@@ -257,15 +259,9 @@ const redraw = (time) => {
   if(camera.gameX < canvas.width/2){
     camera.gameX = canvas.width/2;
   }
-  else if(camera.gameX > 2000){
-    camera.gameX = 2000;
+  else if(camera.gameX > levelWidth - canvas.width/2){
+    camera.gameX = levelWidth - canvas.width/2;
   }
-  
-  if(sunRising){
-    dawnOpacity+=.005;
-    darknessLevel-=.005;
-  }
-  
   
   drawBackground(camera);
   drawWaypoints(camera);
@@ -275,6 +271,20 @@ const redraw = (time) => {
   
   setShadows(camera);
   
+  if(sunRising){
+    dawnOpacity+=.005;
+    darknessLevel-=.005;
+    
+    if(dawnOpacity >=1){
+      ctx.save();
+      ctx.globalAlpha = endFadeIn;
+      ctx.drawImage(endingImage, 0, 0);
+      ctx.restore();
+
+      endFadeIn+=.005;
+    }
+    
+  }
   
   
 

@@ -4,7 +4,8 @@ let ctx;
 let ctx2;
 let walkImage; //spritesheet for player
 let backgroundImage; //image for background
-let waypointImage; //image for background
+let waypointImage; //shrine image
+let endingImage;
 
 let backgrounds = [];
 //our websocket connection 
@@ -18,7 +19,13 @@ let collidables = [];
 let collidableSprites = {};
 let waypoints = [];
 
-let rock;
+//Variables for the sunrise at the end
+let sunRising = false;
+let dawnOpacity = 0;
+let darknessLevel = .8;
+let endFadeIn = 0;
+
+const levelWidth = 8000;
 
 var KEYBOARD = {
 	"KEY_D": 68, 
@@ -108,6 +115,7 @@ const init = () => {
   collidableSprites['lilypad'] = document.querySelector('#lilypad');
   
   waypointImage = document.querySelector('#lantern');
+  endingImage = document.querySelector('#endingImage');
   
   //background3_Dawn
   for(let i = 2; i < 11; i++){
@@ -132,6 +140,7 @@ const init = () => {
   socket.on('left', removeUser); //when a user leaves
   socket.on('createLevel', createLevel);
   socket.on('respawnPlayer', respawnPlayer);
+  socket.on('endGame', endGame);
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);

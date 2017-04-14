@@ -125,14 +125,16 @@ const createSmallPond = (x) => {
 
 
 const createLevel = () => {
-  /*// Level 1: Intro to blocks
+  // Level 1: Intro to blocks
   createShortBlock(200);
   createTallBlock(250);
   createShortBlock(300);
   
+  waypoints.push(500);
+  
 
   // Level 2: Intro to bushes
-  createShortBush(500);
+  createShortBush(700);
   createTallBush(570);
   createShortBush(660);
 
@@ -142,7 +144,7 @@ const createLevel = () => {
   createShortBlock(850);
   createShortTree(900);
 
-  createTallTree(1000);*/
+  createTallTree(1000);
   
   createShortBush(250);
   createTallBush(300);

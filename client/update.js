@@ -1,3 +1,7 @@
+const endGame = () => {
+  sunRising = true;
+};
+
 //when we receive a character update
 const updateMovement = (data) => {
   //if we do not have that character (based on their id)
@@ -71,7 +75,7 @@ const updatePhysics = (data) => {
 
     updatedPlayer.alpha = 0.05;
   }
-}
+};
 
 const respawnPlayer = (data) => {
   const hash = data.hash;
@@ -80,7 +84,7 @@ const respawnPlayer = (data) => {
   players[hash].x = lastWayPoint;
   players[hash].prevX = lastWayPoint;
   players[hash].destX = lastWayPoint;
-}
+};
 
 //function to remove a character from our character list
 const removeUser = (data) => {
@@ -131,21 +135,6 @@ const updatePosition = () => {
   //move the last x/y to our previous x/y variables
   player.prevX = player.x;
   player.prevY = player.y;
-  
-  /*player.destY+= player.velocityY;
-  if(player.destY <= 0) player.destY = 1;
-  if(player.destY >= 400) player.destY = 399;
-
-  //if user is moving left, decrease x
-  if(player.moveLeft && player.destX > 0) {
-    console.log("moving left");
-    player.destX -= 2;
-  }
-  //if user is moving right, increase x
-  if(player.moveRight && player.destX < 1000) {
-    console.log("moving right");
-      player.destX += 2;
-  }*/
 
   let moving = false;
 
@@ -156,7 +145,7 @@ const updatePosition = () => {
     moving = true;
   }
   //if user is moving right, increase x
-  if(player.moveRight && player.x < 2000 && !player.lightUp) {
+  if(player.moveRight && player.x < levelWidth && !player.lightUp) {
     //player.destX += 2;
     player.velocityX = 20;
     moving = true;

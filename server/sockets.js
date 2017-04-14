@@ -4,13 +4,15 @@
 const xxh = require('xxhashjs');
 // Player class
 const Player = require('./classes/Player.js');
+// Room class
+const Room = require('./classes/Room.js');
 // our physics calculation file
 const physics = require('./physics.js');
 
 const LevelLoader = require('./levelLoader.js');
 
-// object of user characters
-//let players = {};
+//List of player rooms
+const rooms = {};
 
 // List of collidable objects
 let collidables = [];
@@ -49,7 +51,7 @@ const updatePhysics = (playerList, roomName) => {
     }
   }
 
-    // Update all player physics
+  // Update all player physics
   io.sockets.in(roomName).emit('updatePhysics', { updatedPlayers: playerList });
 };
 
@@ -66,8 +68,9 @@ const createLevel = (socket) => {
   socket.emit('createLevel', { collidableObjs: collidables, wayPoints: waypoints });
 };
 
-const checkWaypoints = (hash, roomName) => {
-  const room = rooms[roomName];
+const checkWaypoints = (socket) => {
+  const hash = socket.hash;
+  const room = rooms[socket.roomName];
   //Check if player is at the end of the game 
   //Aka, the last waypoint
   if(room.players[hash].x > waypoints[waypoints.length-1]){
@@ -82,7 +85,7 @@ const checkWaypoints = (hash, roomName) => {
          
          //Check if another player is past the last waypoint
          if(otherPlayer.x > waypoints[waypoints.length-1]){
-           console.log("END OF GAME");
+           socket.emit('endGame', null);
          }
        }
      }
@@ -101,15 +104,8 @@ const checkWaypoints = (hash, roomName) => {
   
 };
 
-const rooms = {};
 
-class Room{
-  constructor(name){
-    this.name = name;
-    this.numUsers = 1;
-    this.players = {};
-  }
-}
+
 
 const addUserToRoom = (sock, hash) =>{
   const socket = sock;
@@ -185,7 +181,7 @@ const setupSockets = (ioServer) => {
         room.players[socket.hash].destX = prevX + velocityX;
       }
       
-      checkWaypoints(socket.hash, socket.roomName);
+      checkWaypoints(socket);
 
 
       // update timestamp of last change for this character
@@ -214,7 +210,16 @@ const setupSockets = (ioServer) => {
       io.sockets.in(socket.roomName).emit('left', room.players[socket.hash]);
 
       delete room.players[socket.hash];
+      room.numUsers--;
+            
       physics.setPlayerList(room.players, socket.roomName);
+      
+      //if the room is now empty, delete it
+      if(room.numUsers <= 0){
+        delete rooms[socket.roomName];
+        physics.setRoomList(rooms);
+      }
+
 
       socket.leave(socket.roomName);
     });

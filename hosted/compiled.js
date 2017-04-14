@@ -4,7 +4,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var sunRising = true;
+var sunRising = false;
 var dawnOpacity = 0;
 var darknessLevel = .8;
 
@@ -253,13 +253,8 @@ var redraw = function redraw(time) {
 
   if (camera.gameX < canvas.width / 2) {
     camera.gameX = canvas.width / 2;
-  } else if (camera.gameX > 2000) {
-    camera.gameX = 2000;
-  }
-
-  if (sunRising) {
-    dawnOpacity += .005;
-    darknessLevel -= .005;
+  } else if (camera.gameX > levelWidth - canvas.width / 2) {
+    camera.gameX = levelWidth - canvas.width / 2;
   }
 
   drawBackground(camera);
@@ -268,6 +263,20 @@ var redraw = function redraw(time) {
   drawPlayers(camera);
 
   setShadows(camera);
+
+  if (sunRising) {
+    dawnOpacity += .005;
+    darknessLevel -= .005;
+
+    if (dawnOpacity >= 1) {
+      ctx.save();
+      ctx.globalAlpha = endFadeIn;
+      ctx.drawImage(endingImage, 0, 0);
+      ctx.restore();
+
+      endFadeIn += .005;
+    }
+  }
 
   //set our next animation frame
   animationFrame = requestAnimationFrame(redraw);
@@ -280,7 +289,8 @@ var ctx = void 0;
 var ctx2 = void 0;
 var walkImage = void 0; //spritesheet for player
 var backgroundImage = void 0; //image for background
-var waypointImage = void 0; //image for background
+var waypointImage = void 0; //shrine image
+var endingImage = void 0;
 
 var backgrounds = [];
 //our websocket connection 
@@ -294,7 +304,13 @@ var collidables = [];
 var collidableSprites = {};
 var waypoints = [];
 
-var rock = void 0;
+//Variables for the sunrise at the end
+var sunRising = false;
+var dawnOpacity = 0;
+var darknessLevel = .8;
+var endFadeIn = 0;
+
+var levelWidth = 8000;
 
 var KEYBOARD = {
   "KEY_D": 68,
@@ -382,6 +398,7 @@ var init = function init() {
   collidableSprites['lilypad'] = document.querySelector('#lilypad');
 
   waypointImage = document.querySelector('#lantern');
+  endingImage = document.querySelector('#endingImage');
 
   //background3_Dawn
   for (var i = 2; i < 11; i++) {
@@ -406,6 +423,7 @@ var init = function init() {
   socket.on('left', removeUser); //when a user leaves
   socket.on('createLevel', createLevel);
   socket.on('respawnPlayer', respawnPlayer);
+  socket.on('endGame', endGame);
 
   window.addEventListener('keydown', onKeyDown);
   window.addEventListener('keyup', onKeyUp);
@@ -413,6 +431,10 @@ var init = function init() {
 
 window.onload = init;
 'use strict';
+
+var endGame = function endGame() {
+  sunRising = true;
+};
 
 //when we receive a character update
 var updateMovement = function updateMovement(data) {
@@ -546,20 +568,6 @@ var updatePosition = function updatePosition() {
   player.prevX = player.x;
   player.prevY = player.y;
 
-  /*player.destY+= player.velocityY;
-  if(player.destY <= 0) player.destY = 1;
-  if(player.destY >= 400) player.destY = 399;
-    //if user is moving left, decrease x
-  if(player.moveLeft && player.destX > 0) {
-    console.log("moving left");
-    player.destX -= 2;
-  }
-  //if user is moving right, increase x
-  if(player.moveRight && player.destX < 1000) {
-    console.log("moving right");
-      player.destX += 2;
-  }*/
-
   var moving = false;
 
   //if user is moving left, decrease x
@@ -569,7 +577,7 @@ var updatePosition = function updatePosition() {
     moving = true;
   }
   //if user is moving right, increase x
-  if (player.moveRight && player.x < 2000 && !player.lightUp) {
+  if (player.moveRight && player.x < levelWidth && !player.lightUp) {
     //player.destX += 2;
     player.velocityX = 20;
     moving = true;
