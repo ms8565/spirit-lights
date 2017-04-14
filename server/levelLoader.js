@@ -125,43 +125,61 @@ const createSmallPond = (x) => {
 
 
 const createLevel = () => {
-  // Level 1: Intro to blocks
-  createShortBlock(200);
-  createTallBlock(250);
-  createShortBlock(300);
+  waypoints.push(160);
   
-  waypoints.push(500);
+  // Level 1: Intro to blocks
+  createShortBlock(400);
+  createTallBlock(450);
+  createShortBlock(500);
+  
+  waypoints.push(700);
   
 
   // Level 2: Intro to bushes
-  createShortBush(700);
-  createTallBush(570);
-  createShortBush(660);
+  createShortBlock(900);
+  createTallBlock(950);
+  createShortBush(1000);
+  
+  waypoints.push(1200)
 
   // Level 3: First puzzle
+  createShortBush(1400);
+  createTallBush(1460);
+  createShortBush(1550);
+  
+  waypoints.push(1700)
 
   // Level 4: Intro to trees
-  createShortBlock(850);
-  createShortTree(900);
+  createShortBlock(1900);
+  createShortTree(1950);
+  
+  createTallTree(2200);
+  createTallTree(2260);
 
-  createTallTree(1000);
+  createShortBlock(2400);
+  createTallBlock(2450);
+  createShortBlock(2475);
   
-  createShortBush(250);
-  createTallBush(300);
-  createTallTree(400);
+  createTallBlock(2650);
+  createShortBlock(2700);
   
-  createTallTree(600);
+  createTallBlock(2850);
+  createShortBlock(2900);
   
-  createTallTree(800);
+  createTallTree(2990);
+  createShortTrunkedTree(3150);
+  createTallBush(3300);
   
-  createSmallPond(400)
+  waypoints.push(3500);
   
-  waypoints.push(100);
-  waypoints.push(200);
-  waypoints.push(600);
-  waypoints.push(800);
-
-  // Level 4.5: Trees Puzzle
+  //Level 5: More trees
+  createShortBlock(3720);
+  createShortTree(3620);
+  createTallTree(3765);
+  createTallTrunkedTree(3900)
+  
+  waypoints.push(4200);
+  
 
   // Level 6: Intro to ponds
 

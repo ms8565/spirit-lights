@@ -214,7 +214,7 @@ const setShadows = (camera) =>{
   }
   
   //Create light gradient for each waypoint
-  for(let i = 0; i < 5; i++) {
+  for(let i = 0; i < waypoints.length; i++) {
     let drawX = waypoints[i] - camera.gameX + camera.canvasX + 20;
     
     //If the lantern is onscreen or close to it
@@ -278,7 +278,7 @@ const redraw = (time) => {
     if(dawnOpacity >=1){
       ctx.save();
       ctx.globalAlpha = endFadeIn;
-      ctx.drawImage(endingImage, 0, 0);
+      //ctx.drawImage(endingImage, 0, 0);
       ctx.restore();
 
       endFadeIn+=.005;

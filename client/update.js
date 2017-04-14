@@ -107,6 +107,12 @@ const sendJump = () => {
   //send request to server
   socket.emit('jump', player);
 };
+const sendRespawn = () => {
+  const player = players[hash];
+  
+  //send request to server
+  socket.emit('respawn', player);
+};
 
 const sendLightUp = () => {
   const player = players[hash];

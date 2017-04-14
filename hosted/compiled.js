@@ -212,7 +212,7 @@ var setShadows = function setShadows(camera) {
   }
 
   //Create light gradient for each waypoint
-  for (var _i = 0; _i < 5; _i++) {
+  for (var _i = 0; _i < waypoints.length; _i++) {
     var _drawX = waypoints[_i] - camera.gameX + camera.canvasX + 20;
 
     //If the lantern is onscreen or close to it
@@ -271,7 +271,7 @@ var redraw = function redraw(time) {
     if (dawnOpacity >= 1) {
       ctx.save();
       ctx.globalAlpha = endFadeIn;
-      ctx.drawImage(endingImage, 0, 0);
+      //ctx.drawImage(endingImage, 0, 0);
       ctx.restore();
 
       endFadeIn += .005;
@@ -325,18 +325,23 @@ var onKeyDown = function onKeyDown(e) {
   var keyPressed = e.which;
   var player = players[hash];
 
-  //Space
-  if (keyPressed === 32) {
-    sendLightUp();
+  //R
+  if (keyPressed === 82) {
+    //Respawn the player
+    sendRespawn();
   }
-  // A or Left
-  else if (keyPressed === 65 || keyPressed === 37) {
-      player.moveLeft = true;
+  //Space
+  else if (keyPressed === 32) {
+      sendLightUp();
     }
-    // D or Right
-    else if (keyPressed === 68 || keyPressed === 39) {
-        player.moveRight = true;
+    // A or Left
+    else if (keyPressed === 65 || keyPressed === 37) {
+        player.moveLeft = true;
       }
+      // D or Right
+      else if (keyPressed === 68 || keyPressed === 39) {
+          player.moveRight = true;
+        }
 
   //W or Up
   if (keyPressed === 87 || keyPressed === 38) {
@@ -538,6 +543,12 @@ var sendJump = function sendJump() {
 
   //send request to server
   socket.emit('jump', player);
+};
+var sendRespawn = function sendRespawn() {
+  var player = players[hash];
+
+  //send request to server
+  socket.emit('respawn', player);
 };
 
 var sendLightUp = function sendLightUp() {

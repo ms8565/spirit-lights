@@ -196,7 +196,7 @@ const setupSockets = (ioServer) => {
 
     socket.on('updateLight', (data) => {
       room.players[socket.hash] = data;
-      physics.setPlayer(players[socket.hash], socket.roomName);
+      physics.setPlayer(room.players[socket.hash], socket.roomName);
 
       io.sockets.in(socket.roomName).emit('updateMovement', room.players[socket.hash]);
     });
@@ -204,6 +204,11 @@ const setupSockets = (ioServer) => {
       physics.playerJump(room.players[socket.hash], socket.roomName);
 
       io.sockets.in(socket.roomName).emit('updateMovement', room.players[socket.hash]);
+    });
+    socket.on('respawn', (data) => {
+      const wPoint = room.players[socket.hash].lastWaypoint;
+      
+      io.sockets.in(socket.roomName).emit('respawnPlayer', {hash: socket.hash, waypoint: wPoint});
     });
 
     socket.on('disconnect', () => {

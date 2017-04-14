@@ -39,9 +39,14 @@ var KEYBOARD = {
 const onKeyDown = (e) => {
   var keyPressed = e.which;
   const player = players[hash];
-
+  
+  //R
+  if(keyPressed === 82){
+    //Respawn the player
+    sendRespawn();
+  }
   //Space
-  if(keyPressed === 32) {
+  else if(keyPressed === 32) {
     sendLightUp();
   }
   // A or Left
