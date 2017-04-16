@@ -304,7 +304,7 @@ const redraw = (time) => {
     if(dawnOpacity >=1){
       ctx.save();
       ctx.globalAlpha = endFadeIn;
-      //ctx.drawImage(endingImage, 0, 0);
+      ctx.drawImage(endingImage, 0, 0);
       ctx.restore();
 
       endFadeIn+=.005;

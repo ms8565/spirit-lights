@@ -298,7 +298,7 @@ var redraw = function redraw(time) {
     if (dawnOpacity >= 1) {
       ctx.save();
       ctx.globalAlpha = endFadeIn;
-      //ctx.drawImage(endingImage, 0, 0);
+      ctx.drawImage(endingImage, 0, 0);
       ctx.restore();
 
       endFadeIn += .005;
@@ -492,7 +492,7 @@ var init = function init() {
 };
 
 window.onload = init;
-'use strict';
+"use strict";
 
 var endGame = function endGame() {
   sunRising = true;
@@ -533,9 +533,12 @@ var updateMovement = function updateMovement(data) {
 };
 
 var updatePhysics = function updatePhysics(data) {
+
   var updatedPlayers = data.updatedPlayers;
 
   var keys = Object.keys(updatedPlayers);
+  console.log("number of players: " + keys.length);
+  console.log("number of old players: " + Object.keys(players).length);
   for (var i = 0; i < keys.length; i++) {
     var player = updatedPlayers[keys[i]];
 

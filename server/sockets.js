@@ -124,7 +124,9 @@ const addUserToRoom = (sock) => {
   }
   // If there weren't any rooms open, make a new one
   if (!added) {
-    const roomName = `Room${rooms.length}`;
+    // create unqiue roomname based on time
+    const roomName = xxh.h32(`${new Date().getTime()}`, 0xCAFEBABE).toString(16);
+    // const roomName = `Room${Object.keys(rooms).length}`;
     socket.roomName = roomName;
     rooms[roomName] = new Room(roomName);
   }

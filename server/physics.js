@@ -170,7 +170,7 @@ setInterval(() => {
   for (let i = 0; i < keys.length; i++) {
     updatePhysics(keys[i]);
   }
-}, 20);
+}, 40);
 
 const playerJump = (player, roomName) => {
   const players = rooms[roomName].players;

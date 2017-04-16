@@ -1,14 +1,17 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Lerping Movement</title>
+    <title>Spirit Lights</title>
     <meta charset="utf-8"/>
+    <link href="https://fonts.googleapis.com/css?family=PT+Sans|VT323" rel="stylesheet">
     <style>
       html, body {
         width: 100%;
         height: 100%;
         margin: 0;
         padding:0;
+        background-color:#afc4dc;
+        font-family: 'PT Sans', sans-serif;
       }
       
       canvas {
@@ -16,53 +19,109 @@
         border: 1px solid black;
       }
       
-      p {
-        margin-left: 12px;
-        font-size: 1.2em;
-        width: 50%; 
+      h1{
+        margin:0;
+        padding-top:1em;
+        font-family: 'VT323', monospace;
+        font-size:30pt;
+      }
+      h2{
+        font-family: 'VT323', monospace;
+        font-size:20pt;
       }
       
       .hidden {
         display: none;
       }
+      #content{
+          position:relative;
+          text-align:center;
+        }
+      #canvas-box{
+        position: absolute; 
+        left: 0; 
+        right: 0; 
+        margin-left: auto; 
+        margin-right: auto; 
+        width: 1000px;
+      }
+      .infoBox{
+        position: absolute; 
+        top: 600px;
+        left: 0; 
+        right: 0; 
+        margin-left: auto; 
+        margin-right: auto; 
+        width: 1000px;
+      }
+      
+      
     </style>
     <script src="/socket.io/socket.io.js"></script>
 	<script src="/assets/compiled.js"> </script>
 </head>
 <body>
-    <canvas id="canvas"  height="500" width="1000" style="position: absolute; top: 0px; left: 0px; z-index: 100;">Please use an HTML 5 browser</canvas>
-    <canvas id="canvas2" height="500" width="1000" style="position: absolute; top: 0px; left: 0px; z-index: 100;">Please use an HTML 5 browser</canvas>
-    <img id="walk" class="hidden" src="/assets/images/spritesheet.png" alt="walk spritesheet" />
-    <img id="background" class="hidden" src="/assets/images/Background.png" alt="background" />
-  
-    <img id="background1" class="hidden" src="/assets/images/backgrounds/background1.png" alt="background" />
-    <img id="background2" class="hidden" src="/assets/images/backgrounds/background2.png" alt="background" />
-    <img id="background3" class="hidden" src="/assets/images/backgrounds/background3.png" alt="background" />
-    <img id="background3_Dawn" class="hidden" src="/assets/images/backgrounds/background3_Dawn.png" alt="background" />
-    <img id="background4" class="hidden" src="/assets/images/backgrounds/background4.png" alt="background" />
-    <img id="background5" class="hidden" src="/assets/images/backgrounds/background5.png" alt="background" />
-    <img id="background6" class="hidden" src="/assets/images/backgrounds/background6.png" alt="background" />
-    <img id="background7" class="hidden" src="/assets/images/backgrounds/background7.png" alt="background" />
-    <img id="background8" class="hidden" src="/assets/images/backgrounds/background8.png" alt="background" />
-    <img id="background9" class="hidden" src="/assets/images/backgrounds/background9.png" alt="background" />
-    <img id="background10" class="hidden" src="/assets/images/backgrounds/background10.png" alt="background" />
-    <img id="endingImage" class="hidden" src="/assets/images/backgrounds/endingImage.png" alt="background" />
-  
-    <img id="test" class="hidden" src="/assets/images/test.png" alt="block" />
-    <img id="blockS" class="hidden" src="/assets/images/blockS.png" alt="block" />
-    <img id="blockT" class="hidden" src="/assets/images/blockT.png" alt="block" />
-    <img id="bushS" class="hidden" src="/assets/images/bushS.png" alt="bush" />
-    <img id="bushT" class="hidden" src="/assets/images/bushT.png" alt="bush" />
-    <img id="treeS" class="hidden" src="/assets/images/treeS.png" alt="tree1" />
-    <img id="treeT" class="hidden" src="/assets/images/treeT.png" alt="tree2" />
-    <img id="trunk1" class="hidden" src="/assets/images/trunk1.png" alt="tree" />
-    <img id="trunk2" class="hidden" src="/assets/images/trunk2.png" alt="tree" />
-    <img id="branch1" class="hidden" src="/assets/images/branch1.png" alt="branch" />
-    <img id="branch2" class="hidden" src="/assets/images/branch2.png" alt="branch" />
-    <img id="pond1" class="hidden" src="/assets/images/pond1.png" alt="pond" />
-    <img id="pond2" class="hidden" src="/assets/images/pond1.png" alt="pond" />
-    <img id="lilypad" class="hidden" src="/assets/images/lilypad.png" alt="lilypad" />
-    <img id="lantern" class="hidden" src="/assets/images/lantern1.png" alt="lantern" />
-    <img id="shrine" class="hidden" src="/assets/images/shrine.png" alt="shrine" />
+  <img src="assets/images/border1.png" style="float:left" alt="Border"/>
+  <img src="assets/images/border2.png" style="float:right" alt="Border"/>
+    <div id="content">
+      
+      <h1>Spirit Lights</h1>
+      <div id= "canvas-box">
+        <canvas id="canvas"  height="500" width="1000" style="position: absolute; top: 0px; left: 0px; z-index: 100;">Please use an HTML 5 browser</canvas>
+        <canvas id="canvas2" height="500" width="1000" style="position: absolute; top: 0px; left: 0px; z-index: 100;">Please use an HTML 5 browser</canvas>
+      </div>
+      
+      </div>
+      <div class="infoBox">
+      <div class="info">
+        <h2>About</h2>
+        <p>A 2D, mulitplayer platformer game. You will be randomly matched in a two-person level with other users online. Help each other navigate the forest and make it to the shrine.</p>
+        <p>Use WASD or Arrow keys to move and jump. Hold the space bar to brighten your light. Press R to teleport to the last waypoint.</p>
+      </div>
+      <div class="info">
+        <h2>Assets</h2>
+        <p>Many thanks the artists whose art I used</p>
+        <ul>
+          <li>Backgrounds from <a href="https://edermunizz.itch.io/free-pixel-art-forest">Pixel Art Forest</a></li>
+          <li>Sky and clouds from  <a href="https://opengameart.org/content/magic-cliffs-environment">Magic Cliffs Environments</a></li>
+          <li>Small trees from  <a href="https://opengameart.org/content/sunset-temple-tiles">Sunset Temple Tiles</a></li>
+          <li>Goblin Spritesheet modified from  <a href="https://opengameart.org/users/calciumtrice">Calciumtrice</a></li>
+        </ul>
+      </div>
+        </div>
+
+      <img id="walk" class="hidden" src="/assets/images/spritesheet.png" alt="walk spritesheet" />
+      <img id="background" class="hidden" src="/assets/images/Background.png" alt="background" />
+
+      <img id="background1" class="hidden" src="/assets/images/backgrounds/background1.png" alt="background" />
+      <img id="background2" class="hidden" src="/assets/images/backgrounds/background2.png" alt="background" />
+      <img id="background3" class="hidden" src="/assets/images/backgrounds/background3.png" alt="background" />
+      <img id="background3_Dawn" class="hidden" src="/assets/images/backgrounds/background3_Dawn.png" alt="background" />
+      <img id="background4" class="hidden" src="/assets/images/backgrounds/background4.png" alt="background" />
+      <img id="background5" class="hidden" src="/assets/images/backgrounds/background5.png" alt="background" />
+      <img id="background6" class="hidden" src="/assets/images/backgrounds/background6.png" alt="background" />
+      <img id="background7" class="hidden" src="/assets/images/backgrounds/background7.png" alt="background" />
+      <img id="background8" class="hidden" src="/assets/images/backgrounds/background8.png" alt="background" />
+      <img id="background9" class="hidden" src="/assets/images/backgrounds/background9.png" alt="background" />
+      <img id="background10" class="hidden" src="/assets/images/backgrounds/background10.png" alt="background" />
+      <img id="endingImage" class="hidden" src="/assets/images/backgrounds/endingImage.png" alt="background" />
+
+      <img id="test" class="hidden" src="/assets/images/test.png" alt="block" />
+      <img id="blockS" class="hidden" src="/assets/images/blockS.png" alt="block" />
+      <img id="blockT" class="hidden" src="/assets/images/blockT.png" alt="block" />
+      <img id="bushS" class="hidden" src="/assets/images/bushS.png" alt="bush" />
+      <img id="bushT" class="hidden" src="/assets/images/bushT.png" alt="bush" />
+      <img id="treeS" class="hidden" src="/assets/images/treeS.png" alt="tree1" />
+      <img id="treeT" class="hidden" src="/assets/images/treeT.png" alt="tree2" />
+      <img id="trunk1" class="hidden" src="/assets/images/trunk1.png" alt="tree" />
+      <img id="trunk2" class="hidden" src="/assets/images/trunk2.png" alt="tree" />
+      <img id="branch1" class="hidden" src="/assets/images/branch1.png" alt="branch" />
+      <img id="branch2" class="hidden" src="/assets/images/branch2.png" alt="branch" />
+      <img id="pond1" class="hidden" src="/assets/images/pond1.png" alt="pond" />
+      <img id="pond2" class="hidden" src="/assets/images/pond1.png" alt="pond" />
+      <img id="lilypad" class="hidden" src="/assets/images/lilypad.png" alt="lilypad" />
+      <img id="lantern" class="hidden" src="/assets/images/lantern1.png" alt="lantern" />
+      <img id="shrine" class="hidden" src="/assets/images/shrine.png" alt="shrine" />
+    
 </body>
 </html>

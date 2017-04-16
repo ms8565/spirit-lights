@@ -37,9 +37,12 @@ const updateMovement = (data) => {
 };
 
 const updatePhysics = (data) => {
+  
   const updatedPlayers = data.updatedPlayers;
   
   const keys = Object.keys(updatedPlayers);
+  console.log("number of players: "+keys.length);
+  console.log("number of old players: "+Object.keys(players).length);
   for (let i = 0; i < keys.length; i++){
     let player = updatedPlayers[keys[i]];
     
