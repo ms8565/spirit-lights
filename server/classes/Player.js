@@ -31,6 +31,7 @@ class Player {
     this.velocityX = 0;
     this.dead = false;
     this.lastWaypoint = 0;
+    this.jumping = false;
   }
 }
 

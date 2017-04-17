@@ -46,23 +46,28 @@ const onKeyDown = (e) => {
   if(keyPressed === 82){
     //Respawn the player
     sendRespawn();
+    sendActionUpdate();
   }
   //Space
   else if(keyPressed === 32) {
     sendLightUp();
+    sendActionUpdate();
   }
   // A or Left
   else if(keyPressed === 65 || keyPressed === 37) {
     player.moveLeft = true;
+    sendActionUpdate();
   }
   // D or Right
   else if(keyPressed === 68 || keyPressed === 39) {
     player.moveRight = true;
+    sendActionUpdate();
   }
   
   //W or Up
   if(keyPressed === 87 || keyPressed === 38) {
     sendJump();
+    sendActionUpdate();
   }
 
 };
@@ -75,16 +80,19 @@ const onKeyUp = (e) => {
   //Space
   if(keyPressed === 32) {
     player.lightUp = false;
+    sendActionUpdate();
   }
   // A or Left
   else if(keyPressed === 65 || keyPressed === 37) {
     player.moveLeft = false;
     console.log('Left Up');
+    sendActionUpdate();
   }
   // D or Right
   else if(keyPressed === 68 || keyPressed === 39) {
     player.moveRight = false;
     console.log('Right Up');
+    sendActionUpdate();
   }
 };
 
@@ -172,7 +180,7 @@ const init = () => {
   socket = io.connect();
 
   socket.on('joined', setUser); //when user joins
-  socket.on('updateMovement', updateMovement); //when players move
+  socket.on('updateAction', updateAction); //when players move
   socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
   socket.on('createLevel', createLevel);

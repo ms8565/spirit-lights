@@ -86,6 +86,7 @@ const checkMoveY = (player, roomName) => {
   // If the player is below the ground
   if (newY > groundY) {
     return true;
+    
   }
 
   const player1 = { x: player.x,
@@ -93,7 +94,7 @@ const checkMoveY = (player, roomName) => {
     width: player.width,
     height: player.height };
 
-  if (checkPlayerCollisions(player1, player.hash, roomName)) return true;
+  //if (checkPlayerCollisions(player1, player.hash, roomName)) return true;
 
   if (checkObjectCollisions(player1, player.hash, roomName)) return true;
 
@@ -126,6 +127,13 @@ const updatePhysics = (roomName) => {
   // gravity update physics
   const keys = Object.keys(players);
   for (let i = 0; i < keys.length; i++) {
+    if(players[keys[i]].jumping){
+      console.log('jumping is true');
+      players[keys[i]].velocityY += players[keys[i]].jumpHeight;
+      players[keys[i]].prevY = players[keys[i]].destY;
+      players[keys[i]].destY = players[keys[i]].prevY + players[keys[i]].velocityY;
+      players[keys[i]].jumping = false;
+    }
     // Check if next update of gravity will make the player collide
     if (checkMoveY(players[keys[i]], roomName)) {
         // Player will collide on y axis
@@ -173,14 +181,20 @@ setInterval(() => {
 }, 40);
 
 const playerJump = (player, roomName) => {
+  console.log('player jump');
   const players = rooms[roomName].players;
-
+  players[player.hash].jumping = true;
   // If the player isn't in the air
-  if (players[player.hash].velocityY === 0) {
-    players[player.hash].velocityY += players[player.hash].jumpHeight;
-    players[player.hash].inAir = true;
-    updatePhysics(roomName);
-  }
+  /*if (players[player.hash].velocityY === 0) {
+    
+    //players[player.hash].velocityY += players[player.hash].jumpHeight;
+    
+    players[player.hash].prevY = players[player.hash].destY;
+    players[player.hash].destY = players[player.hash].prevY + players[player.hash].velocityY;
+    //updatePhysics(roomName);
+  }*/
+  //sockets.updatePhysics(players, roomName);
+  return players[player.hash];
 };
 
 module.exports.setPlayerList = setPlayerList;

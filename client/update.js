@@ -3,7 +3,8 @@ const endGame = () => {
 };
 
 //when we receive a character update
-const updateMovement = (data) => {
+const updateAction = (data) => {
+  
   //if we do not have that character (based on their id)
   //then add them
   if(!players[data.hash]) {
@@ -22,27 +23,19 @@ const updateMovement = (data) => {
 
   const player = players[data.hash];
   //update their action and movement information
-  player.prevX = data.prevX;
-  player.prevY = data.prevY;
-  player.destX = data.destX;
-  player.destY = data.destY;
-  player.action = data.action;
   player.moveLeft = data.moveLeft;
   player.moveRight = data.moveRight;
   player.lightUp = data.lightUp;
+  player.destY = data.destY;
   player.velocityY = data.velocityY;
-  player.velocityX = data.velocityX;
     
   player.alpha = 0.05;
 };
 
 const updatePhysics = (data) => {
-  
   const updatedPlayers = data.updatedPlayers;
   
   const keys = Object.keys(updatedPlayers);
-  console.log("number of players: "+keys.length);
-  console.log("number of old players: "+Object.keys(players).length);
   for (let i = 0; i < keys.length; i++){
     let player = updatedPlayers[keys[i]];
     
@@ -74,10 +67,13 @@ const updatePhysics = (data) => {
     updatedPlayer.action = player.action;
     updatedPlayer.velocityY = player.velocityY;
     updatedPlayer.lightRadius = player.lightRadius;
-    //player.velocityX = data.velocityX;
+
+    updatedPlayer.velocityX = data.velocityX;
 
     updatedPlayer.alpha = 0.05;
   }
+  sendActionUpdate();
+  
 };
 
 const respawnPlayer = (data) => {
@@ -107,8 +103,12 @@ const setUser = (data) => {
 const sendJump = () => {
   const player = players[hash];
   
-  //send request to server
-  socket.emit('jump', player);
+  if(player.velocityY === 0){
+    player.velocityY += player.jumpHeight;
+    socket.emit('jump', player);
+    console.log('sent jump');
+  }
+  
 };
 const sendRespawn = () => {
   const player = players[hash];
@@ -138,7 +138,7 @@ const sendLightDown = () => {
 };
 
 //update this user's positions based on keyboard input
-const updatePosition = () => {
+const sendActionUpdate = () => {
   const player = players[hash];
 
   //move the last x/y to our previous x/y variables
@@ -179,5 +179,5 @@ const updatePosition = () => {
   player.alpha = 0.05;
 
   //send the updated movement request to the server to validate the movement.
-  socket.emit('movementUpdate', player);
+  socket.emit('actionUpdate', player);
 };

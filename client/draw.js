@@ -270,7 +270,7 @@ const setShadows = (camera) =>{
 //redraw with requestAnimationFrame
 const redraw = (time) => {
   //update this user's positions
-  updatePosition();
+  //updatePosition();
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 

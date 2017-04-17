@@ -267,7 +267,7 @@ var setShadows = function setShadows(camera) {
 //redraw with requestAnimationFrame
 var redraw = function redraw(time) {
   //update this user's positions
-  updatePosition();
+  //updatePosition();
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -358,23 +358,28 @@ var onKeyDown = function onKeyDown(e) {
   if (keyPressed === 82) {
     //Respawn the player
     sendRespawn();
+    sendActionUpdate();
   }
   //Space
   else if (keyPressed === 32) {
       sendLightUp();
+      sendActionUpdate();
     }
     // A or Left
     else if (keyPressed === 65 || keyPressed === 37) {
         player.moveLeft = true;
+        sendActionUpdate();
       }
       // D or Right
       else if (keyPressed === 68 || keyPressed === 39) {
           player.moveRight = true;
+          sendActionUpdate();
         }
 
   //W or Up
   if (keyPressed === 87 || keyPressed === 38) {
     sendJump();
+    sendActionUpdate();
   }
 };
 
@@ -386,16 +391,19 @@ var onKeyUp = function onKeyUp(e) {
   //Space
   if (keyPressed === 32) {
     player.lightUp = false;
+    sendActionUpdate();
   }
   // A or Left
   else if (keyPressed === 65 || keyPressed === 37) {
       player.moveLeft = false;
       console.log('Left Up');
+      sendActionUpdate();
     }
     // D or Right
     else if (keyPressed === 68 || keyPressed === 39) {
         player.moveRight = false;
         console.log('Right Up');
+        sendActionUpdate();
       }
 };
 
@@ -480,7 +488,7 @@ var init = function init() {
   socket = io.connect();
 
   socket.on('joined', setUser); //when user joins
-  socket.on('updateMovement', updateMovement); //when players move
+  socket.on('updateAction', updateAction); //when players move
   socket.on('updatePhysics', updatePhysics); //after physics updates
   socket.on('left', removeUser); //when a user leaves
   socket.on('createLevel', createLevel);
@@ -492,14 +500,15 @@ var init = function init() {
 };
 
 window.onload = init;
-"use strict";
+'use strict';
 
 var endGame = function endGame() {
   sunRising = true;
 };
 
 //when we receive a character update
-var updateMovement = function updateMovement(data) {
+var updateAction = function updateAction(data) {
+
   //if we do not have that character (based on their id)
   //then add them
   if (!players[data.hash]) {
@@ -518,27 +527,19 @@ var updateMovement = function updateMovement(data) {
 
   var player = players[data.hash];
   //update their action and movement information
-  player.prevX = data.prevX;
-  player.prevY = data.prevY;
-  player.destX = data.destX;
-  player.destY = data.destY;
-  player.action = data.action;
   player.moveLeft = data.moveLeft;
   player.moveRight = data.moveRight;
   player.lightUp = data.lightUp;
+  player.destY = data.destY;
   player.velocityY = data.velocityY;
-  player.velocityX = data.velocityX;
 
   player.alpha = 0.05;
 };
 
 var updatePhysics = function updatePhysics(data) {
-
   var updatedPlayers = data.updatedPlayers;
 
   var keys = Object.keys(updatedPlayers);
-  console.log("number of players: " + keys.length);
-  console.log("number of old players: " + Object.keys(players).length);
   for (var i = 0; i < keys.length; i++) {
     var player = updatedPlayers[keys[i]];
 
@@ -568,10 +569,12 @@ var updatePhysics = function updatePhysics(data) {
     updatedPlayer.action = player.action;
     updatedPlayer.velocityY = player.velocityY;
     updatedPlayer.lightRadius = player.lightRadius;
-    //player.velocityX = data.velocityX;
+
+    updatedPlayer.velocityX = data.velocityX;
 
     updatedPlayer.alpha = 0.05;
   }
+  sendActionUpdate();
 };
 
 var respawnPlayer = function respawnPlayer(data) {
@@ -601,8 +604,11 @@ var setUser = function setUser(data) {
 var sendJump = function sendJump() {
   var player = players[hash];
 
-  //send request to server
-  socket.emit('jump', player);
+  if (player.velocityY === 0) {
+    player.velocityY += player.jumpHeight;
+    socket.emit('jump', player);
+    console.log('sent jump');
+  }
 };
 var sendRespawn = function sendRespawn() {
   var player = players[hash];
@@ -632,7 +638,7 @@ var sendLightDown = function sendLightDown() {
 };
 
 //update this user's positions based on keyboard input
-var updatePosition = function updatePosition() {
+var sendActionUpdate = function sendActionUpdate() {
   var player = players[hash];
 
   //move the last x/y to our previous x/y variables
@@ -670,5 +676,5 @@ var updatePosition = function updatePosition() {
   player.alpha = 0.05;
 
   //send the updated movement request to the server to validate the movement.
-  socket.emit('movementUpdate', player);
+  socket.emit('actionUpdate', player);
 };

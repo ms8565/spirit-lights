@@ -7,6 +7,7 @@
     <style>
       html, body {
         width: 100%;
+        min-width:1300px;
         height: 100%;
         margin: 0;
         padding:0;
@@ -33,7 +34,12 @@
       .hidden {
         display: none;
       }
+      #container{
+        min-width:1000px;
+        position:relative;
+      }
       #content{
+          min-width:1000px;
           position:relative;
           text-align:center;
         }
@@ -63,6 +69,7 @@
 <body>
   <img src="assets/images/border1.png" style="float:left" alt="Border"/>
   <img src="assets/images/border2.png" style="float:right" alt="Border"/>
+    <div id="container">
     <div id="content">
       
       <h1>Spirit Lights</h1>
@@ -88,7 +95,8 @@
           <li>Goblin Spritesheet modified from  <a href="https://opengameart.org/users/calciumtrice">Calciumtrice</a></li>
         </ul>
       </div>
-        </div>
+      </div>
+      </div>
 
       <img id="walk" class="hidden" src="/assets/images/spritesheet.png" alt="walk spritesheet" />
       <img id="background" class="hidden" src="/assets/images/Background.png" alt="background" />

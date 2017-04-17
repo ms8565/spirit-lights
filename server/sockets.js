@@ -165,7 +165,7 @@ const setupSockets = (ioServer) => {
     physics.setRoomList(rooms);
 
     // when this user sends the server a movement update
-    socket.on('movementUpdate', (data) => {
+    socket.on('actionUpdate', (data) => {
       // update the user's info
       // NOTICE: THIS IS NOT VALIDED AND IS UNSAFE
       room.players[socket.hash] = data;
@@ -191,19 +191,20 @@ const setupSockets = (ioServer) => {
       physics.setPlayer(room.players[socket.hash], socket.roomName);
 
       // Update other players with movement
-      io.sockets.in(socket.roomName).emit('updateMovement', room.players[socket.hash]);
+      io.sockets.in(socket.roomName).emit('updateAction', room.players[socket.hash]);
     });
 
     socket.on('updateLight', (data) => {
       room.players[socket.hash] = data;
+      io.sockets.in(socket.roomName).emit('updateAction', room.players[socket.hash]);
       physics.setPlayer(room.players[socket.hash], socket.roomName);
-
-      io.sockets.in(socket.roomName).emit('updateMovement', room.players[socket.hash]);
     });
-    socket.on('jump', () => {
-      physics.playerJump(room.players[socket.hash], socket.roomName);
-
-      io.sockets.in(socket.roomName).emit('updateMovement', room.players[socket.hash]);
+    socket.on('jump', (data) => {
+      //room.players[socket.hash] = data;
+      //physics.setPlayer(room.players[socket.hash], socket.roomName);
+      room.players[socket.hash] = physics.playerJump(room.players[socket.hash], socket.roomName);
+      io.sockets.in(socket.roomName).emit('updateAction', room.players[socket.hash]);
+      
     });
     socket.on('respawn', () => {
       const wPoint = room.players[socket.hash].lastWaypoint;
